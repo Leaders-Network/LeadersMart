@@ -16,3 +16,18 @@ export interface Category {
 export interface CartItem extends Product {
   quantity: number;
 }
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role?: 'user' | 'admin';
+  password?: string;
+}
+
+export interface Vendor {
+  id: string;
+  name: string;
+  active: boolean;
+  contactEmail?: string;
+}

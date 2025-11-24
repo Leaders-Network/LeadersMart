@@ -1,13 +1,17 @@
-'use client';
+ 'use client';
 
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { categories } from '@/data/categories';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const { totalItems } = useCart();
   const [showCategories, setShowCategories] = useState(false);
+  const { user, signOut } = useAuth();
+  const router = useRouter();
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -65,6 +69,24 @@ export default function Header() {
                 </span>
               )}
             </Link>
+
+            {user && (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => router.push('/account/change-password')}
+                  className="text-sm px-3 py-1 bg-white border border-blue-300 text-blue-700 rounded hover:bg-blue-50"
+                >
+                  Change password
+                </button>
+
+                <button
+                  onClick={() => signOut()}
+                  className="text-sm px-3 py-1 bg-white border border-red-300 text-red-600 rounded hover:bg-red-50"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
 
          
 
