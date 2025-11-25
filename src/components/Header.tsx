@@ -77,6 +77,9 @@ export default function Header() {
           <Link href="/help" className="text-gray-700 hover:text-blue-600 font-semibold transition-colors">
             Help
           </Link>
+          <Link href="/vendor" className="text-gray-700 hover:text-blue-600 font-semibold transition-colors">
+            Sell on ShopHub
+          </Link>
 
            <div
             className="relative"
