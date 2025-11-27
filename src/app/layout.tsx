@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
-import Header from "@/components/Header";
+import ConditionalHeader from "@/components/ConditionalHeader";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body
@@ -32,7 +34,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <CartProvider>
-            <Header />
+            <ConditionalHeader />
             <main className="min-h-screen">{children}</main>
           </CartProvider>
         </AuthProvider>
