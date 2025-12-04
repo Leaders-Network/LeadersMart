@@ -11,7 +11,7 @@ export default function AdminLayout({
     <div>
         <AdminHeader />
         <AdminSidebar />
-      <main className="ml-65 pt-16 p-6 bg-gray-50 min-h-screen ">
+      <main className="ml-65 pt-16 p-2 bg-gray-50 min-h-screen ">
         {children}
       </main>
 

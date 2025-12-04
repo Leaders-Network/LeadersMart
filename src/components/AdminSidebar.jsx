@@ -12,6 +12,7 @@ export default function AdminSidebar (){
     {href: '/admin/order', label: 'Orders', icon: AiOutlineShoppingCart},
     {href: '/admin/product', label: 'Products', icon: MdProductionQuantityLimits},
     {href: '/admin/customers', label: 'Customers', icon: FiUser},
+    {href: '/admin/vendors', label: 'Vendors', icon: FiUser},
     {href: '/admin/payment', label: 'Payments', icon: FiCreditCard},
     {href: '/admin/report', label: 'Reports', icon: FiBarChart2},
     {href: '/admin/setting', label: 'Settings', icon: FiSettings},
@@ -20,7 +21,7 @@ export default function AdminSidebar (){
 
   const pathname = usePathname()
   return (
-    <aside className='w-65 left-0 top-0 h-screen bg-gradient-to-b from-blue-100 via-white to-purple-200 border-r border-gray-200 shadow-md p-4  fixed'>
+    <aside className='w-65 left-0 top-0 h-screen bg-linear-to-b from-blue-100 via-white to-purple-200 border-r border-gray-200 shadow-md p-4  fixed font-[lexend]'>
       <div className='flex items-center font-semibold text-[1.2rem] gap-1 bg-blue'>
         <Image
           src='/leadersmartLogo.png'
