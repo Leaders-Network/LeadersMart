@@ -5,7 +5,7 @@ import { Bell, Moon, Search, Sun } from 'lucide-react'
 export default function AdminHeader () {
 
   return (
-    <header className='fixed top-0 left-65 right-0 h-16 bg-gradient-to-l from-blue-100 via-white to-purple-200 border-b border-gray-200 shadow-md z-40 font-[lexend]'>
+    <header className='fixed top-0 left-65 right-0 h-16 bg-linear-to-l from-blue-100 via-white to-purple-200 border-b border-gray-200 shadow-md z-40 font-[lexend]'>
         <div className='h-full px-6 flex items-center justify-between'>
           <div className='flex items-center gap-5'>
             <h1 className='font-semibold text-[1.5rem]'>Welcome!👋</h1>
