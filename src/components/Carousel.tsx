@@ -48,9 +48,9 @@ export default function Carousel() {
                 <h1 className="text-6xl font-bold mb-4 animate-fade-in">{slide.title}</h1>
                 <p className="text-4xl font-semibold mb-4 animate-fade-in-delay">{slide.subtitle}</p>
                 <p className="text-xl mb-8 animate-fade-in-delay-2">{slide.description}</p>
-                <button className="bg-white text-blue-600 px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 animate-fade-in-delay-3">
+                <a href="/categories/electronics" className="inline-block bg-white text-blue-600 px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 animate-fade-in-delay-3">
                   Shop Now
-                </button>
+                </a>
               </div>
             </div>
           </div>
