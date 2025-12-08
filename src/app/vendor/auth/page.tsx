@@ -144,7 +144,7 @@ export default function VendorAuthPage() {
                 <>
                   <FormField
                     label="Business name"
-                    value={formValues.businessName}
+                    value={formValues.businessName} 
                     placeholder="E.g. Northstar Gadgets"
                     onChange={(value) => handleChange('businessName', value)}
                   />
