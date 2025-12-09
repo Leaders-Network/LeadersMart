@@ -15,7 +15,7 @@ export default function AdminHeader() {
     { id: 3, message: 'Payment confirmed', time: '2 hours ago', unread: false },
     { id: 4, message: 'New customer registered', time: '5 hours ago', unread: false }
   ]);
-  const [unreadCount, setUnreadCount] = useState(2);
+  const [unreadCount, setUnreadCount] = useState(5);
 
   // Listen for sidebar toggle events
   useEffect(() => {

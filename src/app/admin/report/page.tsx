@@ -8,7 +8,6 @@ import {
   ArrowUpRight, ArrowDownRight, Eye, DollarSign
 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart as RePieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-
 // Types
 interface ReportCard {
   id: string;

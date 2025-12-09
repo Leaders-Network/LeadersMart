@@ -175,6 +175,62 @@ const ReportPage: React.FC = () => {
         </div>
 
         {/* Report Cards */}
+        {/* <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-gray-900">Available Reports</h2>
+            <div className="flex gap-2">
+              <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Last 6 Months
+              </button>
+              <button className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Export All
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {reportCards.map((report) => {
+              const ReportIcon = report.icon;
+              return (
+                <a key={report.id} href={report.href} className={`${report.bgColor} rounded-xl p-6 border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1 block`}>
+                  <div className="flex items-start justify-between mb-4">
+                  <div className={`p-3 rounded-xl ${report.color} bg-white shadow-sm`}>
+                    <ReportIcon className="w-7 h-7" />
+                  </div>
+                  <button className="p-2 hover:bg-white rounded-lg transition-colors">
+                    <Eye className="w-5 h-5 text-gray-400" />
+                  </button>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{report.title}</h3>
+                  <p className="text-sm text-gray-600 mb-6 leading-relaxed">{report.description}</p>
+
+                  <div className="grid grid-cols-3 gap-3 mb-6 pb-6 border-b border-gray-200">
+                  {report.stats.map((stat, idx) => (
+                    <div key={idx}>
+                    <p className="text-xs text-gray-500 mb-1">{stat.label}</p>
+                    <p className="text-lg font-bold text-gray-900">{stat.value}</p>
+                    </div>
+                  ))}
+                  </div>
+
+                  <button 
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    report.id === 'sales' ? 'bg-purple-600 hover:bg-purple-700 text-white' :
+                    report.id === 'orders' ? 'bg-blue-600 hover:bg-blue-700 text-white' :
+                    'bg-pink-600 hover:bg-pink-700 text-white'
+                  }`}
+                  >
+                  {report.buttonText}
+                  <ArrowUpRight className="w-4 h-4" />
+                  </button>
+                </a>
+              );
+            })}
+          </div>
+        </div> */}
 
         {/* Analytics Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -282,6 +338,44 @@ const ReportPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Top Products */}
+        <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Top Performing Products</h2>
+              <p className="text-sm text-gray-500 mt-1">Highest revenue generators</p>
+            </div>
+            <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              View Details
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {topProducts.map((product, index) => (
+              <div key={index} className="bg-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                    #{index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 text-sm">{product.name}</h4>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Revenue</span>
+                    <span className="font-bold text-gray-900">₦{product.revenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Units Sold</span>
+                    <span className="font-semibold text-purple-600">{product.units}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Quick Actions */}
         <div className="mt-8 bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100">
