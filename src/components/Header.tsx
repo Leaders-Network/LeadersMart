@@ -1,21 +1,45 @@
- 'use client';
+'use client';
 
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { categories } from '@/data/categories';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const { totalItems } = useCart();
   const [showCategories, setShowCategories] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Listen for theme changes
+  useEffect(() => {
+    const handleThemeChange = (event: CustomEvent) => {
+      if (event.detail && typeof event.detail.isDarkMode === 'boolean') {
+        setIsDarkMode(event.detail.isDarkMode);
+      }
+    };
+
+    window.addEventListener('themeToggle', handleThemeChange as EventListenerOrEventListenerObject);
+
+    // Check initial theme
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        setIsDarkMode(true);
+      }
+    }
+
+    return () => {
+      window.removeEventListener('themeToggle', handleThemeChange as EventListenerOrEventListenerObject);
+    };
+  }, []);
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <header className={`shadow-md sticky top-0 z-50 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
 
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white py-2">
+      <div className={`py-2 ${isDarkMode ? 'bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 text-gray-200' : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white'}`}>
         <div className="container mx-auto px-4 text-sm flex justify-between">
           <span>Welcome to ShopHub - Your trusted marketplace</span>
           <span>Free delivery on orders above $50</span>
@@ -28,7 +52,7 @@ export default function Header() {
           {/* Logo */}
           <Link
             href="/"
-            className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
+            className={`text-4xl font-bold bg-gradient-to-r ${isDarkMode ? 'from-blue-400 to-indigo-400' : 'from-blue-600 to-indigo-600'} bg-clip-text text-transparent`}
           >
             ShopHub
           </Link>
@@ -39,9 +63,17 @@ export default function Header() {
               <input
                 type="text"
                 placeholder="Search products, brands and categories..."
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none ${
+                  isDarkMode 
+                    ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-blue-500' 
+                    : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
+                }`}
               />
-              <button className="absolute right-0 top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-r-lg hover:from-blue-700 hover:to-indigo-700">
+              <button className={`absolute right-0 top-0 px-6 py-3 rounded-r-lg ${
+                isDarkMode 
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700' 
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700'
+              }`}>
                 Search
               </button>
             </div>
@@ -51,7 +83,9 @@ export default function Header() {
 
             {/* Account Dropdown */}
             <div
-              className="relative cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
+              className={`relative cursor-pointer flex items-center gap-2 transition-colors ${
+                isDarkMode ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'
+              }`}
               onMouseEnter={() => setShowAccountMenu(true)}
               onMouseLeave={() => setShowAccountMenu(false)}
             >
@@ -71,17 +105,31 @@ export default function Header() {
               </svg>
 
               {showAccountMenu && (
-                <div className="absolute top-full right-0 mt-2 w-56 bg-white shadow-2xl rounded-lg overflow-hidden border-2 border-blue-100 z-50">
-                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3">
+                <div className={`absolute top-full right-0 mt-2 w-56 shadow-2xl rounded-lg overflow-hidden border-2 z-50 ${
+                  isDarkMode 
+                    ? 'bg-gray-800 border-gray-700' 
+                    : 'bg-white border-blue-100'
+                }`}>
+                  <div className={`px-4 py-3 ${
+                    isDarkMode 
+                      ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-white' 
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
+                  }`}>
                     <p className="font-semibold">Welcome!</p>
-                    <p className="text-xs text-blue-100">Sign in to access your account</p>
+                    <p className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-blue-100'}`}>
+                      Sign in to access your account
+                    </p>
                   </div>
 
                   <div className="py-2">
 
                     <Link
                       href="/login"
-                      className="block px-4 py-3 hover:bg-blue-50 transition-colors font-medium text-gray-700 hover:text-blue-600"
+                      className={`block px-4 py-3 transition-colors font-medium ${
+                        isDarkMode 
+                          ? 'text-gray-300 hover:bg-gray-700 hover:text-blue-400' 
+                          : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,7 +146,11 @@ export default function Header() {
 
                     <Link
                       href="/signup"
-                      className="block px-4 py-3 hover:bg-blue-50 transition-colors font-medium text-gray-700 hover:text-blue-600"
+                      className={`block px-4 py-3 transition-colors font-medium ${
+                        isDarkMode 
+                          ? 'text-gray-300 hover:bg-gray-700 hover:text-blue-400' 
+                          : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,11 +165,15 @@ export default function Header() {
                       </div>
                     </Link>
 
-                    <div className="border-t my-2"></div>
+                    <div className={`border-t my-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}></div>
 
                     <Link
                       href="/dashboard"
-                      className="block px-4 py-3 hover:bg-blue-50 transition-colors font-medium text-gray-700 hover:text-blue-600"
+                      className={`block px-4 py-3 transition-colors font-medium ${
+                        isDarkMode 
+                          ? 'text-gray-300 hover:bg-gray-700 hover:text-blue-400' 
+                          : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +181,7 @@ export default function Header() {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 01 1m-6 0h6"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1m-6 0h6"
                           />
                         </svg>
                         <span>My Dashboard</span>
@@ -134,7 +190,11 @@ export default function Header() {
 
                     <Link
                       href="/help"
-                      className="block px-4 py-3 hover:bg-blue-50 transition-colors font-medium text-gray-700 hover:text-blue-600"
+                      className={`block px-4 py-3 transition-colors font-medium ${
+                        isDarkMode 
+                          ? 'text-gray-300 hover:bg-gray-700 hover:text-blue-400' 
+                          : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +215,12 @@ export default function Header() {
             </div>
 
             {/* Cart */}
-            <Link href="/cart" className="flex items-center gap-2 hover:text-blue-600 relative transition-colors">
+            <Link 
+              href="/cart" 
+              className={`flex items-center gap-2 relative transition-colors ${
+                isDarkMode ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -173,13 +238,28 @@ export default function Header() {
             </Link>
 
             {/* Top Links */}
-            <Link href="/" className="text-gray-700 hover:text-blue-600 font-semibold transition-colors">
+            <Link 
+              href="/" 
+              className={`font-semibold transition-colors ${
+                isDarkMode ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
               Home
             </Link>
-            <Link href="/deals" className="text-gray-700 hover:text-blue-600 font-semibold transition-colors">
+            <Link 
+              href="/deals" 
+              className={`font-semibold transition-colors ${
+                isDarkMode ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
               Today's Deals
             </Link>
-            <Link href="/help" className="text-gray-700 hover:text-blue-600 font-semibold transition-colors">
+            <Link 
+              href="/help" 
+              className={`font-semibold transition-colors ${
+                isDarkMode ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
               Help
             </Link>
 
@@ -189,7 +269,11 @@ export default function Header() {
               onMouseEnter={() => setShowCategories(true)}
               onMouseLeave={() => setShowCategories(false)}
             >
-              <button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 font-semibold">
+              <button className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all transform hover:scale-105 font-semibold ${
+                isDarkMode 
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700' 
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700'
+              }`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -197,12 +281,20 @@ export default function Header() {
               </button>
 
               {showCategories && (
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white shadow-2xl rounded-lg overflow-hidden border-2 border-blue-100">
+                <div className={`absolute top-full left-0 mt-2 w-64 shadow-2xl rounded-lg overflow-hidden border-2 ${
+                  isDarkMode 
+                    ? 'bg-gray-800 border-gray-700' 
+                    : 'bg-white border-blue-100'
+                }`}>
                   {categories.map((category) => (
                     <Link
                       key={category.id}
                       href={`/categories/${category.slug}`}
-                      className="block px-6 py-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 transition-all border-b last:border-b-0 font-medium"
+                      className={`block px-6 py-3 transition-all border-b last:border-b-0 font-medium ${
+                        isDarkMode 
+                          ? 'text-gray-300 hover:bg-gray-700 hover:text-blue-400 border-gray-700' 
+                          : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 border-gray-200'
+                      }`}
                     >
                       {category.name}
                     </Link>
