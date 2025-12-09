@@ -25,6 +25,11 @@ const lexend = Lexend({
 export const metadata: Metadata = {
   title: "ShopHub - Your Online Store",
   description: "Browse and shop from our wide selection of products",
+  icons: {
+    icon: '/leadersmartLogo.png',
+    shortcut: '/leadersmartLogo.png',
+    apple: '/leadersmartLogo.png',
+  },
 };
 
 export default function RootLayout({
