@@ -1,199 +1,278 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { users as initialUsers } from '@/data/users';
-import { vendors as initialVendors } from '@/data/vendors';
-import { User, Vendor } from '@/types';
-import { useAuth } from '@/context/AuthContext';
 
-export default function AdminPage() {
-  const { user } = useAuth();
-  const router = useRouter();
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [vendors, setVendors] = useState<Vendor[]>(initialVendors);
-  const [userQuery, setUserQuery] = useState('');
-  const [vendorQuery, setVendorQuery] = useState('');
-  const [vendorFilterActive, setVendorFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
+import React, { useState } from 'react';
+import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, Package, ArrowUpRight, ArrowDownRight, MoreVertical } from 'lucide-react';
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-  useEffect(() => {
-    // Redirect to signin if not authenticated or not admin
-    if (!user) router.push('/admin/signin');
-  }, [user, router]);
+// Sample data
+const salesData = [
+  { name: 'Jan', revenue: 45000, orders: 120 },
+  { name: 'Feb', revenue: 52000, orders: 145 },
+  { name: 'Mar', revenue: 48000, orders: 130 },
+  { name: 'Apr', revenue: 61000, orders: 165 },
+  { name: 'May', revenue: 55000, orders: 150 },
+  { name: 'Jun', revenue: 67000, orders: 180 },
+  { name: 'Jul', revenue: 72000, orders: 195 },
+  { name: 'Aug', revenue: 68000, orders: 175 },
+  { name: 'Sep', revenue: 78000, orders: 210 },
+  { name: 'Oct', revenue: 85000, orders: 230 },
+  { name: 'Nov', revenue: 92000, orders: 250 },
+  { name: 'Dec', revenue: 98000, orders: 270 }
+];
 
-  const removeUser = (id: string) => {
-    if (!confirm('Remove this user? This action cannot be undone.')) return;
-    setUsers((prev) => prev.filter((u) => u.id !== id));
-  };
+const topProducts = [
+  { name: 'Premium Headphones', sales: 1240, revenue: 124000, trend: 12.5, color: '#8b5cf6' },
+  { name: 'Wireless Mouse', sales: 980, revenue: 49000, trend: 8.3, color: '#ec4899' },
+  { name: 'Mechanical Keyboard', sales: 756, revenue: 113400, trend: -3.2, color: '#3b82f6' },
+  { name: 'USB-C Hub', sales: 650, revenue: 32500, trend: 15.7, color: '#10b981' },
+  { name: 'Laptop Stand', sales: 542, revenue: 27100, trend: 5.4, color: '#f59e0b' }
+];
 
-  const toggleVendorActive = (id: string) => {
-    const v = vendors.find((x) => x.id === id);
-    if (!v) return;
-    const confirmMsg = v.active ? 'Deactivate vendor?' : 'Activate vendor?';
-    if (!confirm(confirmMsg)) return;
-    setVendors((prev) => prev.map((v) => (v.id === id ? { ...v, active: !v.active } : v)));
-  };
+const categoryData = [
+  { name: 'Electronics', value: 45, color: '#8b5cf6' },
+  { name: 'Accessories', value: 30, color: '#ec4899' },
+  { name: 'Peripherals', value: 15, color: '#3b82f6' },
+  { name: 'Others', value: 10, color: '#10b981' }
+];
 
-  // If user is not loaded yet, show nothing (redirect will happen)
-  if (!user) return null;
-
-  const filteredUsers = users.filter(
-    (u) => u.name.toLowerCase().includes(userQuery.toLowerCase()) || u.email.toLowerCase().includes(userQuery.toLowerCase()) || u.id.includes(userQuery)
-  );
-
-  const filteredVendors = vendors.filter((v) => {
-    const matchesQuery = v.name.toLowerCase().includes(vendorQuery.toLowerCase()) || v.id.includes(vendorQuery);
-    if (vendorFilterActive === 'all') return matchesQuery;
-    if (vendorFilterActive === 'active') return matchesQuery && v.active;
-    return matchesQuery && !v.active;
-  });
-
+const StatCard = ({ title, value, change, icon: Icon }) => {
+  const isPositive = change >= 0;
+  
   return (
-    <div className="p-6 bg-blue-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-semibold text-blue-900">Admin Dashboard</h1>
-            <p className="text-sm text-gray-600 mt-1">Manage users, vendors and site settings</p>
-          </div>
-          <div className="text-sm text-black">Signed in as <span className="font-medium">{user.name}</span> ({user.email})</div>
+    <div className="bg-white font-[lexend] rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`p-3 rounded-lg ${
+          title.includes('Revenue') ? 'bg-purple-100' :
+          title.includes('Orders') ? 'bg-blue-100' :
+          title.includes('Customers') ? 'bg-pink-100' :
+          'bg-green-100'
+        }`}>
+          <Icon className={`w-6 h-6 ${
+            title.includes('Revenue') ? 'text-purple-600' :
+            title.includes('Orders') ? 'text-blue-600' :
+            title.includes('Customers') ? 'text-pink-600' :
+            'text-green-600'
+          }`} />
+        </div>
+        <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+          isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+        }`}>
+          {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+          {Math.abs(change)}%
+        </div>
+      </div>
+      
+      <h3 className="text-gray-600 text-sm font-medium mb-1">{title}</h3>
+      <p className="text-3xl font-bold text-gray-900">
+        {title.includes('Revenue') ? `₦${value.toLocaleString()}` : value.toLocaleString()}
+      </p>
+      <p className="text-xs text-gray-500 mt-2">
+        {isPositive ? '+' : ''}{change}% from last month
+      </p>
+    </div>
+  );
+};
+
+const AdminDashboard = () => {
+  const [timeRange, setTimeRange] = useState('12M');
+  
+  const stats = [
+    { title: "Total Revenue", value: 2450300, change: 12.5, icon: DollarSign },
+    { title: "Total Orders", value: 1500, change: 8.3, icon: ShoppingCart },
+    { title: "Total Customers", value: 800, change: -3.2, icon: Users },
+    { title: "Total Products", value: 124, change: 5.4, icon: Package }
+  ];
+  
+  return (
+    <div className='bg-gradient-to-t from-blue-100 via-white to-purple-200 min-h-screen w-full mt-4 p-3 rounded-lg shadow-md'>
+      <div className='bg-white min-h-screen rounded-lg shadow-md p-5'>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+        
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <StatCard 
+              key={index}
+              title={stat.title} 
+              value={stat.value} 
+              change={stat.change}
+              icon={stat.icon}
+            />
+          ))}
         </div>
 
-        {/* Summary cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="p-4 bg-white rounded shadow border border-blue-100">
-            <div className="text-sm text-gray-500">Total Users</div>
-            <div className="text-2xl font-semibold text-black">{users.length}</div>
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Sales Chart */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-purple-50 to-white rounded-xl p-6 shadow-sm border border-gray-100 font-[lexend]">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Revenue Overview</h2>
+                <p className="text-sm text-gray-500 mt-1">Monthly revenue trends</p>
+              </div>
+              <div className="flex gap-2">
+                {['7D', '1M', '3M', '12M'].map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setTimeRange(range)}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                      timeRange === range
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {range}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={salesData}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="name" stroke="#9ca3af" style={{ fontSize: '12px' }} />
+                <YAxis stroke="#9ca3af" style={{ fontSize: '12px' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="revenue" 
+                  stroke="#8b5cf6" 
+                  strokeWidth={2}
+                  fill="url(#colorRevenue)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-          <div className="p-4 bg-white rounded shadow border border-blue-100">
-            <div className="text-sm text-gray-500">Total Vendors</div>
-            <div className="text-2xl font-semibold text-black">{vendors.length}</div>
-          </div>
-          <div className="p-4 bg-white rounded shadow border border-blue-100">
-            <div className="text-sm text-gray-500">Active Vendors</div>
-            <div className="text-2xl font-semibold text-black">{vendors.filter((v) => v.active).length}</div>
-          </div>
-        </div>
 
-        {/* Users section */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-medium text-blue-800">Users</h2>
-            <div className="flex items-center gap-3">
-              <input
-                placeholder="Search users by name, email or id"
-                value={userQuery}
-                onChange={(e) => setUserQuery(e.target.value)}
-                className="px-3 py-2 border rounded-lg w-64"
-              />
-              <button onClick={() => setUserQuery('')} className="text-sm text-blue-600">Clear</button>
+          {/* Category Distribution */}
+          <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 shadow-sm border border-gray-100 font-[lexend]">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Sales by Category</h2>
+                <p className="text-sm text-gray-500 mt-1">Product distribution</p>
+              </div>
+              <button className="p-2 hover:bg-white rounded-lg transition-colors">
+                <MoreVertical className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {categoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            
+            <div className="mt-4 space-y-3 ">
+              {categoryData.map((category) => (
+                <div key={category.name} className="flex items-center justify-between font-[lexend]">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <span className="text-sm text-gray-700">{category.name}</span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">{category.value}%</span>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
 
-          <div className="bg-white rounded shadow overflow-hidden border border-blue-100">
-            <table className="w-full text-left">
-              <thead className="bg-blue-100 text-sm text-black">
-                <tr>
-                  <th className="p-3">ID</th>
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Email</th>
-                  <th className="p-3">Actions</th>
+        {/* Top Products */}
+        <div className="bg-gradient-to-br from-pink-50 to-white rounded-xl p-6 shadow-sm border border-gray-100 font-[lexend]">
+          <div className="flex items-center justify-between mb-6 font-[lexend]">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 font-[lexend]">Top Performing Products</h2>
+              <p className="text-sm text-gray-500 mt-1">Best sellers this month</p>
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+              View All
+              <ArrowUpRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="overflow-x-auto font-[lexend]">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Product</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Sales</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Revenue</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Trend</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Performance</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((u, i) => (
-                  <tr key={u.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="p-3 text-sm text-black">{u.id}</td>
-                    <td className="p-3 text-sm text-black">{u.name}</td>
-                    <td className="p-3 text-sm text-black">{u.email}</td>
-                    <td className="p-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => removeUser(u.id)}
-                          className="px-3 py-1 rounded bg-white border border-blue-300 text-blue-700 hover:bg-blue-50"
+                {topProducts.map((product, index) => (
+                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-semibold"
+                          style={{ backgroundColor: product.color }}
                         >
-                          Remove
-                        </button>
+                          {index + 1}
+                        </div>
+                        <span className="font-medium text-gray-900">{product.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-gray-700">{product.sales.toLocaleString()}</td>
+                    <td className="py-4 px-4 font-semibold text-gray-900">₦{product.revenue.toLocaleString()}</td>
+                    <td className="py-4 px-4">
+                      <div className={`flex items-center gap-1 ${
+                        product.trend >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {product.trend >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                        <span className="text-sm font-medium">{Math.abs(product.trend)}%</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="h-2 rounded-full transition-all duration-500"
+                          style={{ 
+                            width: `${Math.min((product.sales / 1240) * 100, 100)}%`,
+                            backgroundColor: product.color
+                          }}
+                        />
                       </div>
                     </td>
                   </tr>
                 ))}
-                {filteredUsers.length === 0 && (
-                  <tr>
-                    <td className="p-3 text-sm text-gray-600" colSpan={4}>
-                      No users found
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
-        </section>
-
-        {/* Vendors section */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-medium text-blue-800">Vendors</h2>
-            <div className="flex items-center gap-3">
-              <input
-                placeholder="Search vendors by name or id"
-                value={vendorQuery}
-                onChange={(e) => setVendorQuery(e.target.value)}
-                className="px-3 py-2 border rounded-lg w-64"
-              />
-              <select value={vendorFilterActive} onChange={(e) => setVendorFilterActive(e.target.value as any)} className="px-3 py-2 border rounded-lg">
-                <option value="all">All</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-              <button onClick={() => { setVendorQuery(''); setVendorFilterActive('all'); }} className="text-sm text-blue-600">Clear</button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded shadow overflow-hidden border border-blue-100">
-            <table className="w-full text-left">
-              <thead className="bg-blue-100 text-sm text-black">
-                <tr>
-                  <th className="p-3">ID</th>
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Active</th>
-                  <th className="p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredVendors.map((v, i) => (
-                  <tr key={v.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="p-3 text-sm text-black">{v.id}</td>
-                    <td className="p-3 text-sm text-black">{v.name}</td>
-                    <td className="p-3 text-sm">
-                      <span className={`px-2 py-1 rounded text-xs ${v.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}>
-                        {v.active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="p-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleVendorActive(v.id)}
-                          className={`px-3 py-1 rounded text-white ${v.active ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-400 hover:bg-blue-500'}`}
-                        >
-                          {v.active ? 'Deactivate' : 'Activate'}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredVendors.length === 0 && (
-                  <tr>
-                    <td className="p-3 text-sm text-gray-600" colSpan={4}>
-                      No vendors found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default AdminDashboard;
