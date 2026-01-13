@@ -1,3 +1,10 @@
+export interface DeliveryService {
+  id: string;
+  name: string;
+  price: number;
+  estimatedDays: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -10,6 +17,8 @@ export interface Product {
   stock?: number;
   colors?: string[];
   sizes?: string[];
+  vendorLocation: string; // State where vendor is located
+  deliveryServices: DeliveryService[]; // Available delivery services for this product
 }
 
 export interface Category {
@@ -27,4 +36,5 @@ export interface Subcategory {
 
 export interface CartItem extends Product {
   quantity: number;
+  selectedDeliveryService?: DeliveryService;
 }

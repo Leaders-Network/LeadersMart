@@ -34,9 +34,9 @@ export default function ProductCardSimple({ product }: { product: Product }) {
       </div>
       <div className="mt-auto">
         <p className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          ${product.price}
+          ₦{product.price.toLocaleString()}
         </p>
-        <p className="text-xs text-gray-400 line-through mb-3">${(product.price * 1.3).toFixed(2)}</p>
+        <p className="text-xs text-gray-400 line-through mb-3">₦{(product.price * 1.3).toLocaleString()}</p>
         <button
           onClick={() => addToCart(product)}
           className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm"

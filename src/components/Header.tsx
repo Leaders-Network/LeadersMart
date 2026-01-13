@@ -16,7 +16,7 @@ export default function Header() {
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white py-2">
         <div className="container mx-auto px-4 text-sm flex justify-between">
           <span>Welcome to ShopHub - Your trusted marketplace</span>
-          <span>Free delivery on orders above $50</span>
+          <span>Free delivery on orders above ₦80,000</span>
         </div>
       </div>
 

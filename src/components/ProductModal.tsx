@@ -82,9 +82,9 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
               <div className="mb-6">
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    ${product.price}
+                    ₦{product.price.toLocaleString()}
                   </span>
-                  <span className="text-xl text-gray-400 line-through">${(product.price * 1.3).toFixed(2)}</span>
+                  <span className="text-xl text-gray-400 line-through">₦{(product.price * 1.3).toLocaleString()}</span>
                   <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                     -23%
                   </span>

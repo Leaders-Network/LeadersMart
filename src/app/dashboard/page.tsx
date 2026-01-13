@@ -132,7 +132,7 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-gray-500 text-sm">Total Spent</p>
-                        <p className="text-3xl font-bold text-blue-900">$2,450</p>
+                        <p className="text-3xl font-bold text-blue-900">₦3,920,000</p>
                       </div>
                       <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                         <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +164,7 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-blue-900">${99.99 * i}</p>
+                          <p className="font-bold text-blue-900">₦{(159900 * i).toLocaleString()}</p>
                           <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
                             Delivered
                           </span>

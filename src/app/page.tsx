@@ -20,7 +20,7 @@ export default function Home() {
                 <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                 <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
               </svg>
-              FREE SHIPPING on orders over $50
+              FREE SHIPPING on orders over ₦80,000
             </span>
             <span className="flex items-center gap-2">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -363,7 +363,7 @@ export default function Home() {
                       <div className="flex text-yellow-400 text-xs">{'★'.repeat(4)}{'☆'}</div>
                       <span className="text-xs text-gray-500">(2,847)</span>
                     </div>
-                    <p className="text-lg font-bold">${product.price}</p>
+                    <p className="text-lg font-bold">₦{product.price.toLocaleString()}</p>
                   </div>
                 </Link>
               ))}
@@ -394,8 +394,8 @@ export default function Home() {
                   <div className="bg-red-600 text-white text-xs px-2 py-1 rounded inline-block mb-2">
                     Deal
                   </div>
-                  <p className="text-lg font-bold text-red-600">${(product.price * 0.8).toFixed(2)}</p>
-                  <p className="text-sm text-gray-500 line-through">${product.price}</p>
+                  <p className="text-lg font-bold text-red-600">₦{(product.price * 0.8).toLocaleString()}</p>
+                  <p className="text-sm text-gray-500 line-through">₦{product.price.toLocaleString()}</p>
                 </div>
               </Link>
             ))}
@@ -448,7 +448,7 @@ export default function Home() {
                     <div className="flex text-yellow-400 text-xs">{'★'.repeat(4)}{'☆'}</div>
                     <span className="text-xs text-gray-500">(128)</span>
                   </div>
-                  <p className="text-sm font-bold">${product.price}</p>
+                  <p className="text-sm font-bold">₦{product.price.toLocaleString()}</p>
                 </Link>
               ))}
             </div>
@@ -468,7 +468,7 @@ export default function Home() {
                 <div className="flex items-center gap-1 mb-1">
                   <div className="flex text-yellow-400 text-xs">{'★'.repeat(4)}{'☆'}</div>
                 </div>
-                <p className="text-lg font-bold">${product.price}</p>
+                <p className="text-lg font-bold">₦{product.price.toLocaleString()}</p>
               </div>
             </Link>
           ))}

@@ -17,7 +17,7 @@ const slides = [
   },
   {
     title: 'Free Delivery',
-    subtitle: 'On Orders Above $50',
+    subtitle: 'On Orders Above ₦80,000',
     description: 'Shop now and save on shipping',
     gradient: 'from-purple-600 via-indigo-600 to-blue-600',
   },

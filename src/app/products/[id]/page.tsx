@@ -79,8 +79,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {/* Price */}
             <div className="mb-6 pb-6 border-b">
               <div className="flex items-baseline gap-3">
-                <span className="text-5xl font-bold text-blue-900">${product.price}</span>
-                <span className="text-2xl text-gray-400 line-through">${(product.price * 1.3).toFixed(2)}</span>
+                <span className="text-5xl font-bold text-blue-900">₦{product.price.toLocaleString()}</span>
+                <span className="text-2xl text-gray-400 line-through">₦{(product.price * 1.3).toLocaleString()}</span>
                 <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
                   Save 23%
                 </span>

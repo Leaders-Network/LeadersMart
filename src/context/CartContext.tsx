@@ -8,9 +8,11 @@ interface CartContextType {
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  updateDeliveryService: (productId: string, deliveryService: any) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  totalDeliveryPrice: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -26,7 +28,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { 
+        ...product, 
+        quantity: 1, 
+        selectedDeliveryService: product.deliveryServices?.[0] // Default to first delivery service if available
+      }];
     });
   };
 
@@ -44,14 +50,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const updateDeliveryService = (productId: string, deliveryService: any) => {
+    setCart((prev) =>
+      prev.map((item) => 
+        item.id === productId ? { ...item, selectedDeliveryService: deliveryService } : item
+      )
+    );
+  };
+
   const clearCart = () => setCart([]);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalDeliveryPrice = cart.reduce((sum, item) => 
+    sum + (item.selectedDeliveryService?.price || 0) * item.quantity, 0
+  );
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice }}
+      value={{ 
+        cart, 
+        addToCart, 
+        removeFromCart, 
+        updateQuantity, 
+        updateDeliveryService,
+        clearCart, 
+        totalItems, 
+        totalPrice,
+        totalDeliveryPrice
+      }}
     >
       {children}
     </CartContext.Provider>
