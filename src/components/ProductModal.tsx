@@ -40,13 +40,30 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
         <div className="p-6">
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <div className="aspect-square bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-blue-300 text-8xl">📦</span>
+              <div className="aspect-square bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center mb-4 overflow-hidden">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://placehold.co/800x800/e0e7ff/3b82f6?text=Product';
+                  }}
+                />
               </div>
               <div className="grid grid-cols-4 gap-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="aspect-square bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center cursor-pointer hover:ring-2 ring-blue-500">
-                    <span className="text-blue-200 text-2xl">📦</span>
+                {(product.images || [product.image]).slice(0, 4).map((img, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg overflow-hidden cursor-pointer hover:ring-2 ring-blue-500"
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} ${i + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://placehold.co/200x200/e0e7ff/3b82f6?text=Image';
+                      }}
+                    />
                   </div>
                 ))}
               </div>
@@ -65,9 +82,9 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
               <div className="mb-6">
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    ${product.price}
+                    ₦{product.price.toLocaleString()}
                   </span>
-                  <span className="text-xl text-gray-400 line-through">${(product.price * 1.3).toFixed(2)}</span>
+                  <span className="text-xl text-gray-400 line-through">₦{(product.price * 1.3).toLocaleString()}</span>
                   <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                     -23%
                   </span>
