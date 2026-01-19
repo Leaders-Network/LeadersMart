@@ -126,7 +126,7 @@ const CustomersPage = () => {
 
   const statuses = ['All', 'active', 'inactive', 'new'];
 
-  const getStatusConfig = (status) => {
+  const getStatusConfig = (status: string) => {
     switch(status) {
       case 'active':
         return { bg: 'bg-green-50', text: 'text-green-700', label: 'Active' };
