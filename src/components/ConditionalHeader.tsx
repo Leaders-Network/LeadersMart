@@ -15,12 +15,3 @@ export default function ConditionalHeader() {
   
   return <Header />;
 }
-
-  return (
-    <div>
-      {showHeader ? <Header /> : null}
-    </div>
-  )
-}
-
-export default ConditionalHeader;
