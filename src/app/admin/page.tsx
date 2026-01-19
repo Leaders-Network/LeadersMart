@@ -36,7 +36,14 @@ const categoryData = [
   { name: 'Others', value: 10, color: '#10b981' }
 ];
 
-const StatCard = ({ title, value, change, icon: Icon }) => {
+interface StatCardProps {
+  title: string;
+  value: number;
+  change: number;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const StatCard = ({ title, value, change, icon: Icon }: StatCardProps) => {
   const isPositive = change >= 0;
   
   return (
