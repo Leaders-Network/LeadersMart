@@ -38,3 +38,20 @@ export interface CartItem extends Product {
   quantity: number;
   selectedDeliveryService?: DeliveryService;
 }
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin';
+  password?: string; // Optional for client-side use
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Vendor {
+  id: string;
+  name: string;
+  active: boolean;
+  contactEmail?: string;
+}

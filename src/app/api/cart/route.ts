@@ -55,14 +55,19 @@ export async function POST(request: NextRequest) {
 
     const { items } = await request.json();
 
-    let cart = await Cart.findOne({ userId });
-    
-    if (!cart) {
-      cart = await Cart.create({ userId, items });
-    } else {
-      cart.items = items;
-      await cart.save();
-    }
+    // Use findOneAndUpdate to avoid version conflicts
+    const cart = await Cart.findOneAndUpdate(
+      { userId },
+      { 
+        userId,
+        items 
+      },
+      { 
+        new: true, // Return the updated document
+        upsert: true, // Create if doesn't exist
+        runValidators: true // Run schema validation
+      }
+    );
 
     return NextResponse.json({ 
       message: 'Cart updated successfully',

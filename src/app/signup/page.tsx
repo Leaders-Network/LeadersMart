@@ -3,20 +3,39 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SignupPage() {
   const router = useRouter();
+  const { signUp, signingIn } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add registration logic here
-    router.push('/dashboard');
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 4) {
+      setError('Password must be at least 4 characters');
+      return;
+    }
+
+    try {
+      await signUp(formData.name, formData.email, formData.password);
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Registration failed');
+    }
   };
 
   return (
@@ -29,6 +48,12 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+            
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
               <input
@@ -38,6 +63,7 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 placeholder="John Doe"
                 required
+                disabled={signingIn}
               />
             </div>
 
@@ -50,6 +76,7 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 placeholder="you@example.com"
                 required
+                disabled={signingIn}
               />
             </div>
 
@@ -62,6 +89,7 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 placeholder="••••••••"
                 required
+                disabled={signingIn}
               />
             </div>
 
@@ -74,6 +102,7 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 placeholder="••••••••"
                 required
+                disabled={signingIn}
               />
             </div>
 
@@ -93,9 +122,17 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105"
+              disabled={signingIn}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Create Account
+              {signingIn ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Creating Account...
+                </div>
+              ) : (
+                'Create Account'
+              )}
             </button>
           </form>
 

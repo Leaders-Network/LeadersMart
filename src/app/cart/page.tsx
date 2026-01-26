@@ -1,6 +1,8 @@
 'use client';
 
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import AuthGuard from '@/components/AuthGuard';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -12,34 +14,42 @@ const deliveryServices = [
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, updateDeliveryService, totalPrice, totalDeliveryPrice, clearCart, totalItems } = useCart();
+  const { user } = useAuth();
 
   if (cart.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-md mx-auto">
-          <div className="text-8xl mb-6">🛒</div>
-          <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
-          <p className="text-gray-600 mb-6">Browse our categories and discover amazing deals!</p>
-          <Link
-            href="/"
-            className="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 font-semibold"
-          >
-            Start Shopping
-          </Link>
+      <AuthGuard>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="text-8xl mb-6">🛒</div>
+            <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
+            <p className="text-gray-600 mb-6">Browse our categories and discover amazing deals!</p>
+            <Link
+              href="/"
+              className="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 font-semibold"
+            >
+              Start Shopping
+            </Link>
+          </div>
         </div>
-      </div>
+      </AuthGuard>
     );
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
-      <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-8">
-          Shopping Cart ({totalItems} items)
-        </h1>
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <AuthGuard>
+      <div className="bg-gray-50 min-h-screen py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Shopping Cart ({totalItems} items)
+            </h1>
+            <p className="text-gray-600">Welcome, {user?.name}!</p>
+          </div>
+          
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b">
@@ -143,8 +153,10 @@ export default function CartPage() {
                   Clear Cart
                 </button>
               </div>
+                </div>
             </div>
           </div>
+
           <div>
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
               <h2 className="text-xl font-bold mb-4 border-b pb-3">Order Summary</h2>
@@ -190,6 +202,6 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

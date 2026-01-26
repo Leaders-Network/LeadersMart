@@ -138,6 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem(AUTH_KEY);
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(LOGIN_TIME_KEY);
+      // Clear cart when logging out
+      localStorage.removeItem('shophub_cart');
     } catch (error) {
       console.error('Error clearing auth data:', error);
     }
