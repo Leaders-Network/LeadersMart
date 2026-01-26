@@ -6,7 +6,6 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { categories } from '@/data/categories';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const { totalItems, cart, totalPrice } = useCart();
