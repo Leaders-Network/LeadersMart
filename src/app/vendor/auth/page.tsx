@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 type AuthForm = {
   businessName: string;
@@ -13,6 +14,7 @@ type AuthForm = {
 
 export default function VendorAuthPage() {
   const router = useRouter();
+  const { login, vendorSignup, isLoading } = useAuth();
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [formValues, setFormValues] = useState<AuthForm>({
     businessName: '',
@@ -22,24 +24,41 @@ export default function VendorAuthPage() {
     password: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   function handleChange(field: keyof AuthForm, value: string) {
     setFormValues((prev) => ({ ...prev, [field]: value }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
-    setStatusMessage(
-      authMode === 'login'
-        ? 'Authenticating… Redirecting to your dashboard.'
-        : 'Creating your vendor profile… Redirecting to dashboard.',
-    );
+    setError(null);
 
-    setTimeout(() => {
-      router.push('/vendor/dashboard');
-    }, 900);
+    try {
+      if (authMode === 'login') {
+        await login(formValues.email, formValues.password, 'vendor');
+        router.push('/vendor/dashboard');
+      } else {
+        // Validate required fields for signup
+        if (!formValues.businessName || !formValues.contactName || !formValues.phone) {
+          throw new Error('All fields are required for vendor registration');
+        }
+
+        await vendorSignup(
+          formValues.businessName,
+          formValues.contactName,
+          formValues.email,
+          formValues.phone,
+          formValues.password
+        );
+        router.push('/vendor/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -70,28 +89,34 @@ export default function VendorAuthPage() {
           <div className="rounded-3xl border border-blue-100 bg-white p-8 shadow-xl">
             <div className="flex gap-2 rounded-full bg-slate-100 p-1 text-sm font-semibold">
               <button
-                className={`flex-1 rounded-full px-4 py-2 transition ${
-                  authMode === 'login'
+                className={`flex-1 rounded-full px-4 py-2 transition ${authMode === 'login'
                     ? 'bg-white text-blue-700 shadow-sm'
                     : 'text-slate-500 hover:text-slate-800'
-                }`}
+                  }`}
                 onClick={() => setAuthMode('login')}
+                disabled={isSubmitting}
               >
                 Sign in
               </button>
               <button
-                className={`flex-1 rounded-full px-4 py-2 transition ${
-                  authMode === 'signup'
+                className={`flex-1 rounded-full px-4 py-2 transition ${authMode === 'signup'
                     ? 'bg-white text-blue-700 shadow-sm'
                     : 'text-slate-500 hover:text-slate-800'
-                }`}
+                  }`}
                 onClick={() => setAuthMode('signup')}
+                disabled={isSubmitting}
               >
                 Create account
               </button>
             </div>
 
             <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+              {error && (
+                <div className="rounded-2xl bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm">
+                  {error}
+                </div>
+              )}
+
               {authMode === 'signup' && (
                 <>
                   <FormField
@@ -99,18 +124,24 @@ export default function VendorAuthPage() {
                     value={formValues.businessName}
                     placeholder="E.g. Northstar Gadgets"
                     onChange={(value) => handleChange('businessName', value)}
+                    disabled={isSubmitting}
+                    required
                   />
                   <FormField
                     label="Contact person"
                     value={formValues.contactName}
                     placeholder="Your full name"
                     onChange={(value) => handleChange('contactName', value)}
+                    disabled={isSubmitting}
+                    required
                   />
                   <FormField
                     label="Phone number"
                     value={formValues.phone}
                     placeholder="+1 555 987 3210"
                     onChange={(value) => handleChange('phone', value)}
+                    disabled={isSubmitting}
+                    required
                   />
                 </>
               )}
@@ -120,6 +151,9 @@ export default function VendorAuthPage() {
                 value={formValues.email}
                 placeholder="vendor@leadersmart.com"
                 onChange={(value) => handleChange('email', value)}
+                disabled={isSubmitting}
+                required
+                type="email"
               />
 
               <FormField
@@ -128,6 +162,8 @@ export default function VendorAuthPage() {
                 value={formValues.password}
                 placeholder="••••••••"
                 onChange={(value) => handleChange('password', value)}
+                disabled={isSubmitting}
+                required
               />
 
               <button
@@ -140,8 +176,8 @@ export default function VendorAuthPage() {
                     ? 'Signing in...'
                     : 'Creating account...'
                   : authMode === 'login'
-                  ? 'Enter dashboard'
-                  : 'Create vendor account'}
+                    ? 'Enter dashboard'
+                    : 'Create vendor account'}
               </button>
 
               <p className="text-center text-sm text-slate-500">
@@ -152,14 +188,8 @@ export default function VendorAuthPage() {
           </div>
 
           <div className="rounded-3xl border border-dashed border-blue-200 bg-white/80 p-6 text-sm text-slate-600">
-            {statusMessage ? (
-              statusMessage
-            ) : (
-              <>
-                Need access for your support team?{' '}
-                <span className="font-semibold text-blue-600">Invite teammates from the dashboard after login.</span>
-              </>
-            )}
+            Need access for your support team?{' '}
+            <span className="font-semibold text-blue-600">Invite teammates from the dashboard after login.</span>
           </div>
         </div>
       </div>
@@ -173,12 +203,16 @@ function FormField({
   onChange,
   placeholder,
   type = 'text',
+  disabled = false,
+  required = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
+  disabled?: boolean;
+  required?: boolean;
 }) {
   return (
     <label className="text-sm font-semibold text-slate-600">
@@ -188,8 +222,9 @@ function FormField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-2 focus:border-blue-500 focus:outline-none"
-        required
+        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-2 focus:border-blue-500 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+        required={required}
+        disabled={disabled}
       />
     </label>
   );

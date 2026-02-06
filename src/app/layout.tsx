@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Lexend } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
-import { AuthProvider } from "@/context/AuthContext";
+import { NextAuthProvider } from "@/context/NextAuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import ConditionalHeader from "@/components/ConditionalHeader";
 
@@ -38,14 +38,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${lexend.variable} antialiased`}
       >
-        <AuthProvider>
+        <NextAuthProvider>
           <ToastProvider>
             <CartProvider>
               <ConditionalHeader />
               <main className="min-h-screen">{children}</main>
             </CartProvider>
           </ToastProvider>
-        </AuthProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

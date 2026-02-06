@@ -2,79 +2,137 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
+import NextAuthGuard from '@/components/NextAuthGuard';
 
-export default function ChangePasswordPage() {
-  const { user, changePassword, signOut } = useAuth();
+function ChangePasswordContent() {
+  const { user, logout } = useAuth();
   const router = useRouter();
-  const [current, setCurrent] = useState('');
-  const [newPass, setNewPass] = useState('');
-  const [confirm, setConfirm] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-
-  if (!user) {
-    // If not signed in, redirect to signin
-    if (typeof window !== 'undefined') router.push('/admin/signin');
-    return null;
-  }
+  const [isLoading, setIsLoading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    // If stored password exists, require current
-    if (user.password && user.password !== '' && current !== user.password) {
-      setError('Current password is incorrect');
+    setIsLoading(true);
+
+    if (newPassword.length < 6) {
+      setError('New password must be at least 6 characters');
+      setIsLoading(false);
       return;
     }
-    if (newPass.length < 4) {
-      setError('New password must be at least 4 characters');
-      return;
-    }
-    if (newPass !== confirm) {
+
+    if (newPassword !== confirmPassword) {
       setError('Passwords do not match');
+      setIsLoading(false);
       return;
     }
+
     try {
-      await changePassword(newPass);
-      alert('Password changed');
-      router.push('/admin');
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to change password');
+      }
+
+      alert('Password changed successfully');
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err?.message || 'Failed to change password');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white rounded shadow p-6 border border-blue-100">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6 border border-blue-100">
         <h1 className="text-2xl font-semibold mb-2 text-blue-900">Change Password</h1>
-        <p className="text-sm text-gray-600 mb-4">Update your account password. For security, provide your current password if one is set.</p>
+        <p className="text-sm text-gray-600 mb-4">
+          Update your account password. For security, provide your current password.
+        </p>
 
         <form onSubmit={submit} className="space-y-4">
-          {user.password && (
-            <div>
-              <label className="block mb-2 text-sm text-gray-700">Current Password</label>
-              <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} className="w-full p-3 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-200" required />
-            </div>
-          )}
+          <div>
+            <label className="block mb-2 text-sm text-gray-700">Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full p-3 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-200"
+              required
+              disabled={isLoading}
+            />
+          </div>
 
           <div>
             <label className="block mb-2 text-sm text-gray-700">New Password</label>
-            <input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} className="w-full p-3 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-200" required />
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full p-3 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-200"
+              required
+              disabled={isLoading}
+            />
+            <p className="text-sm text-gray-500 mt-1">Must be at least 6 characters</p>
           </div>
 
           <div>
             <label className="block mb-2 text-sm text-gray-700">Confirm New Password</label>
-            <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="w-full p-3 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-200" required />
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full p-3 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-200"
+              required
+              disabled={isLoading}
+            />
           </div>
 
-          {error && <div className="text-red-600">{error}</div>}
+          {error && <div className="text-red-600 text-sm">{error}</div>}
 
           <div className="flex justify-between items-center">
-            <button type="button" onClick={() => { signOut(); router.push('/'); }} className="px-4 py-2 bg-red-200 text-red-700 rounded-lg">Cancel</button>
-            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Change Password</button>
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard')}
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Changing...' : 'Change Password'}
+            </button>
           </div>
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ChangePasswordPage() {
+  return (
+    <NextAuthGuard>
+      <ChangePasswordContent />
+    </NextAuthGuard>
   );
 }

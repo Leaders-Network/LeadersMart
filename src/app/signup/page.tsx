@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signUp, signingIn } = useAuth();
+  const { signup, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,13 +25,13 @@ export default function SignupPage() {
       return;
     }
 
-    if (formData.password.length < 4) {
-      setError('Password must be at least 4 characters');
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
       return;
     }
 
     try {
-      await signUp(formData.name, formData.email, formData.password);
+      await signup(formData.name, formData.email, formData.password);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
@@ -44,7 +44,7 @@ export default function SignupPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-blue-900 mb-2">Create Account</h1>
-            <p className="text-gray-600">Join ShopHub today!</p>
+            <p className="text-gray-600">Join LeaderSmart today!</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -53,7 +53,7 @@ export default function SignupPage() {
                 {error}
               </div>
             )}
-            
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
               <input
@@ -63,7 +63,7 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 placeholder="John Doe"
                 required
-                disabled={signingIn}
+                disabled={isLoading}
               />
             </div>
 
@@ -76,7 +76,7 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 placeholder="you@example.com"
                 required
-                disabled={signingIn}
+                disabled={isLoading}
               />
             </div>
 
@@ -89,8 +89,9 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 placeholder="••••••••"
                 required
-                disabled={signingIn}
+                disabled={isLoading}
               />
+              <p className="text-sm text-gray-500 mt-1">Must be at least 6 characters</p>
             </div>
 
             <div>
@@ -102,37 +103,16 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 placeholder="••••••••"
                 required
-                disabled={signingIn}
+                disabled={isLoading}
               />
-            </div>
-
-            <div className="flex items-start">
-              <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 rounded mt-1" required />
-              <label className="ml-2 text-sm text-gray-600">
-                I agree to the{' '}
-                <Link href="/terms" className="text-blue-600 hover:text-blue-700 font-semibold">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link href="/privacy" className="text-blue-600 hover:text-blue-700 font-semibold">
-                  Privacy Policy
-                </Link>
-              </label>
             </div>
 
             <button
               type="submit"
-              disabled={signingIn}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              disabled={isLoading}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
             >
-              {signingIn ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Creating Account...
-                </div>
-              ) : (
-                'Create Account'
-              )}
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 

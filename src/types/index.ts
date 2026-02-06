@@ -51,7 +51,23 @@ export interface User {
 
 export interface Vendor {
   id: string;
-  name: string;
+  businessName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  role: 'vendor';
   active: boolean;
-  contactEmail?: string;
+  businessDocuments?: {
+    taxId?: string;
+    businessLicense?: string;
+    verified: boolean;
+  };
+  payoutMethod?: {
+    bankName?: string;
+    accountNumber?: string;
+    routingNumber?: string;
+  };
+  deliveryRegions: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }

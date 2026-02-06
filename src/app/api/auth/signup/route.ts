@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (password.length < 4) {
+    if (password.length < 6) {
       return NextResponse.json(
-        { error: 'Password must be at least 4 characters' },
+        { error: 'Password must be at least 6 characters' },
         { status: 400 }
       );
     }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       role: newUser.role,
       createdAt: newUser.createdAt,
     };
-    
+
     return NextResponse.json({
       message: 'User created successfully',
       user: userResponse
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Signup error:', error);
-    
+
     // Handle MongoDB duplicate key error
     if (error.code === 11000) {
       return NextResponse.json(
@@ -67,10 +67,21 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
+  }
+}
+{ error: 'User already exists with this email' },
+{ status: 409 }
+      );
+    }
+
+return NextResponse.json(
+  { error: 'Internal server error' },
+  { status: 500 }
+);
   }
 }

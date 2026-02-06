@@ -2,20 +2,20 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SigninPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const { signIn } = useAuth();
+  const { login, isLoading } = useAuth();
   const router = useRouter();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
-      await signIn(email.trim(), password);
+      await login(email.trim(), password);
       router.push('/admin');
     } catch (err: any) {
       setError(err?.message || 'Sign in failed');
@@ -40,6 +40,7 @@ export default function SigninPage() {
               required
               placeholder="you@company.com"
               className="w-full p-3 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-200"
+              disabled={isLoading}
             />
           </div>
 
@@ -52,17 +53,31 @@ export default function SigninPage() {
               required
               placeholder="••••••••"
               className="w-full p-3 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-200"
+              disabled={isLoading}
             />
           </div>
 
-          {error && <div className="text-red-600">{error}</div>}
+          {error && <div className="text-red-600 text-sm">{error}</div>}
 
           <div className="flex items-center justify-between">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">Sign In</button>
-            <a className="text-sm text-blue-700 hover:underline" href="/admin/signup">Create admin account</a>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+            >
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </button>
           </div>
         </form>
       </div>
     </div>
+  );
+}
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">Sign In</button>
+            <a className="text-sm text-blue-700 hover:underline" href="/admin/signup">Create admin account</a>
+          </div >
+        </form >
+      </div >
+    </div >
   );
 }

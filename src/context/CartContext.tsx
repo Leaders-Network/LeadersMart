@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product, CartItem } from '@/types';
 import { useToast } from '@/context/ToastContext';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CartContextType {
   cart: CartItem[];

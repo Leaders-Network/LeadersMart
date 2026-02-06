@@ -1,54 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
 export async function POST(request: NextRequest) {
   try {
+    // Get session from NextAuth
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     await connectDB();
 
-    const { newPassword } = await request.json();
-    const authHeader = request.headers.get('authorization');
+    const { currentPassword, newPassword } = await request.json();
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!currentPassword || !newPassword) {
       return NextResponse.json(
-        { error: 'Authorization token required' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.substring(7);
-
-    if (!newPassword) {
-      return NextResponse.json(
-        { error: 'New password is required' },
+        { error: 'Current password and new password are required' },
         { status: 400 }
       );
     }
 
-    if (newPassword.length < 4) {
+    if (newPassword.length < 6) {
       return NextResponse.json(
-        { error: 'Password must be at least 4 characters' },
+        { error: 'New password must be at least 6 characters' },
         { status: 400 }
-      );
-    }
-
-    // Verify JWT token
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET) as any;
-    } catch (error) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
       );
     }
 
     // Find user
-    const user = await User.findById(decoded.userId);
+    const user = await User.findById(session.user.id);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -56,11 +44,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { error: 'Current password is incorrect' },
+        { status: 400 }
+      );
+    }
+
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
     // Update user password
-    await User.findByIdAndUpdate(decoded.userId, {
+    await User.findByIdAndUpdate(session.user.id, {
       password: hashedPassword,
     });
 

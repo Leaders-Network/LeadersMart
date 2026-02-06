@@ -3,20 +3,20 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth'
 import { categories } from '@/data/categories';
 import { useState } from 'react';
 
 export default function Header() {
   const { totalItems, cart, totalPrice } = useCart();
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const [showCategories, setShowCategories] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [showCartPreview, setShowCartPreview] = useState(false);
   const router = useRouter();
 
-  const handleSignOut = () => {
-    signOut();
+  const handleLogout = () => {
+    logout();
     setShowAccountMenu(false);
   };
 
@@ -134,7 +134,7 @@ export default function Header() {
                         </Link>
 
                         <button
-                          onClick={handleSignOut}
+                          onClick={handleLogout}
                           className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors font-medium text-red-600 hover:text-red-700"
                         >
                           <div className="flex items-center gap-3">
