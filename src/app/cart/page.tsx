@@ -190,7 +190,7 @@ export default function CartPage() {
                               const service = item.deliveryServices.find(s => s.id === e.target.value);
                               if (service) updateDeliveryService(item.id, service);
                             }}
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           >
                             {item.deliveryServices.map((service) => (
                               <option key={service.id} value={service.id}>
