@@ -4,6 +4,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import AuthGuard from '@/components/AuthGuard';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const deliveryServices = [
@@ -12,11 +13,100 @@ const deliveryServices = [
   { id: 'ridedeliva', name: 'Ridedeliva', price: 20800, estimatedDays: '1-3 days' },
 ];
 
+const paymentOptions = [
+  {
+    id: 'momo',
+    label: 'MTN MoMo',
+    description: 'Pay securely with your MTN mobile wallet for transfers, bill payments, and cashless transactions.',
+    badge: 'Recommended',
+    icon: '💰',
+  },
+  {
+    id: 'ussd',
+    label: 'MTN MoMo USSD',
+    description: 'Use your MTN USSD code to authorize a quick, secure mobile money payment.',
+    badge: 'Fast',
+    icon: '📱',
+  },
+  {
+    id: 'bank',
+    label: 'Bank Transfer',
+    description: 'Transfer to a regular bank account for checkout.',
+    badge: 'Secure',
+    icon: '🏦',
+  },
+  {
+    id: 'card',
+    label: 'Debit / Credit Card',
+    description: 'Use your Visa or Mastercard for secure payment.',
+    badge: 'Popular',
+    icon: '💳',
+  },
+];
+
+type CompletedOrder = {
+  paymentMethod: string;
+  amount: number;
+  itemCount: number;
+  items: Array<{
+    name: string;
+    quantity: number;
+    serviceName: string;
+    serviceFee: number;
+  }>;
+};
+
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, updateDeliveryService, totalPrice, totalDeliveryPrice, clearCart, totalItems } = useCart();
   const { user } = useAuth();
+  const router = useRouter();
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState(false);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('momo');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [momoAccountNumber, setMomoAccountNumber] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [cardName, setCardName] = useState(user?.name || '');
+  const [cardNumber, setCardNumber] = useState('');
+  const [transactionId, setTransactionId] = useState('');
+  const [completedOrder, setCompletedOrder] = useState<CompletedOrder | null>(null);
 
-  if (cart.length === 0) {
+  const grandTotal = totalPrice + totalDeliveryPrice;
+
+  const handleCheckout = () => {
+    setIsPaymentModalOpen(true);
+  };
+
+  const handlePaymentSubmit = () => {
+    const selectedOption = paymentOptions.find((option) => option.id === selectedPaymentMethod);
+
+    if (!selectedOption) return;
+
+    const reference = `${selectedOption.label.toUpperCase().replace(/\s+/g, '-')}-${Date.now().toString().slice(-6)}`;
+    const items = cart.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      serviceName: item.selectedDeliveryService?.name || 'Standard delivery',
+      serviceFee: (item.selectedDeliveryService?.price || 0) * item.quantity,
+    }));
+
+    setCompletedOrder({
+      paymentMethod: selectedOption.label,
+      amount: grandTotal,
+      itemCount: totalItems,
+      items,
+    });
+
+    clearCart();
+    setPaymentCompleted(true);
+    setTransactionId(reference);
+    setIsPaymentModalOpen(false);
+    setIsPaymentSuccessOpen(true);
+  };
+
+  if (cart.length === 0 && !paymentCompleted) {
     return (
       <AuthGuard>
         <div className="container mx-auto px-4 py-16 text-center">
@@ -26,7 +116,7 @@ export default function CartPage() {
             <p className="text-gray-600 mb-6">Browse our categories and discover amazing deals!</p>
             <Link
               href="/"
-              className="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 font-semibold"
+              className="inline-block bg-linear-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 font-semibold"
             >
               Start Shopping
             </Link>
@@ -41,7 +131,7 @@ export default function CartPage() {
       <div className="bg-gray-50 min-h-screen py-8">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Shopping Cart ({totalItems} items)
             </h1>
             <p className="text-gray-600">Welcome, {user?.name}!</p>
@@ -67,7 +157,7 @@ export default function CartPage() {
                       <tr key={item.id} className="border-b last:border-b-0">
                         <td className="p-4">
                           <div className="flex gap-3 items-center">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded flex-shrink-0 overflow-hidden">
+                            <div className="w-16 h-16 bg-linear-to-br from-blue-100 to-indigo-100 rounded shrink-0 overflow-hidden">
                               <img
                                 src={item.image}
                                 alt={item.name}
@@ -172,7 +262,7 @@ export default function CartPage() {
                 </div>
                 <div className="border-t pt-3 flex justify-between font-bold text-xl">
                   <span>Grand Total</span>
-                  <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                     ₦{(totalPrice + totalDeliveryPrice).toLocaleString()}
                   </span>
                 </div>
@@ -189,8 +279,11 @@ export default function CartPage() {
                 ))}
               </div>
 
-              <button className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-lg hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 font-bold text-lg mb-3">
-                Proceed to Checkout
+              <button
+                onClick={handleCheckout}
+                className="w-full bg-linear-to-r from-green-600 to-blue-600 text-white py-4 rounded-lg hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 font-bold text-lg mb-3"
+              >
+                Proceed to Payment
               </button>
               <Link
                 href="/"
@@ -201,6 +294,218 @@ export default function CartPage() {
             </div>
           </div>
         </div>
+
+        {isPaymentSuccessOpen && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/60 p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl">✅</div>
+              <h3 className="text-2xl font-bold text-slate-900">Payment Successful</h3>
+              <p className="mt-2 text-sm text-slate-600">Your order has been placed and the cart has been cleared.</p>
+
+              <div className="mt-5 rounded-xl bg-green-50 p-4 text-left">
+                <p className="text-xs uppercase tracking-[0.2em] text-green-700">Transaction</p>
+                <p className="mt-2 text-lg font-bold text-green-700">{transactionId || 'MOMO-000000'}</p>
+                <p className="mt-1 text-sm text-slate-600">Amount paid: ₦{completedOrder?.amount.toLocaleString() || grandTotal.toLocaleString()}</p>
+                <p className="mt-1 text-sm text-slate-600">Payment method: {completedOrder?.paymentMethod || selectedPaymentMethod}</p>
+                <p className="mt-1 text-sm text-slate-600">Items: {completedOrder?.itemCount || totalItems}</p>
+                <p className="mt-2 text-sm text-slate-600">Status: Order confirmed</p>
+              </div>
+
+              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Delivery & order history</p>
+                <div className="space-y-2">
+                  {(completedOrder?.items || cart.map((item) => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    serviceName: item.selectedDeliveryService?.name || 'Standard delivery',
+                    serviceFee: (item.selectedDeliveryService?.price || 0) * item.quantity,
+                  }))).map((item, index) => (
+                    <div key={`${item.name}-${index}`} className="flex items-center justify-between gap-3 text-sm text-slate-700">
+                      <span>{item.name} ({item.quantity}x)</span>
+                      <span>{item.serviceName} - ₦{item.serviceFee.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPaymentSuccessOpen(false);
+                  setPaymentCompleted(false);
+                  setCompletedOrder(null);
+                  router.push('/');
+                }}
+                className="mt-6 w-full rounded-lg bg-green-600 px-4 py-3 font-semibold text-white hover:bg-green-700"
+              >
+                Continue Shopping
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isPaymentModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
+            <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-green-600">Checkout</p>
+                  <h3 className="mt-2 text-2xl font-bold text-slate-900">Choose payment method</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPaymentModalOpen(false)}
+                  className="text-2xl text-slate-500 hover:text-slate-800"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {paymentOptions.map((option) => {
+                  const isSelected = selectedPaymentMethod === option.id;
+
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setSelectedPaymentMethod(option.id)}
+                      className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition ${
+                        isSelected
+                          ? 'border-green-500 bg-green-50 shadow-sm'
+                          : 'border-slate-200 bg-slate-50 hover:border-green-300 hover:bg-green-50/40'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-2xl shadow-sm">
+                          {option.icon}
+                        </div>
+                        <div>
+                          <p className="text-base font-bold text-slate-900">{option.label}</p>
+                          <p className="text-sm text-slate-600">{option.description}</p>
+                        </div>
+                      </div>
+
+                      <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        {option.badge}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4">
+                {selectedPaymentMethod === 'momo' && (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-semibold text-slate-700">MTN MoMo account number</label>
+                    <input
+                      type="tel"
+                      value={momoAccountNumber || phoneNumber}
+                      onChange={(e) => {
+                        setMomoAccountNumber(e.target.value);
+                        setPhoneNumber(e.target.value);
+                      }}
+                      placeholder="024 000 0000"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 outline-none ring-0 focus:border-green-500"
+                    />
+                    <p className="text-xs text-slate-600">This acts like a secure mobile wallet account number used to receive the payment.</p>
+                  </div>
+                )}
+
+                {selectedPaymentMethod === 'ussd' && (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-semibold text-slate-700">MTN MoMo USSD account number</label>
+                    <input
+                      type="tel"
+                      value={momoAccountNumber || phoneNumber}
+                      onChange={(e) => {
+                        setMomoAccountNumber(e.target.value);
+                        setPhoneNumber(e.target.value);
+                      }}
+                      placeholder="024 000 0000"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 outline-none focus:border-green-500"
+                    />
+                    <p className="text-xs text-slate-600">Use the MTN MoMo shortcode and confirm the payment using this secure mobile wallet account number.</p>
+                  </div>
+                )}
+
+                {selectedPaymentMethod === 'bank' && (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-slate-700">Bank name</label>
+                      <input
+                        type="text"
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
+                        placeholder="Access Bank"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 outline-none focus:border-green-500"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-slate-700">Account number</label>
+                      <input
+                        type="text"
+                        value={accountNumber}
+                        onChange={(e) => setAccountNumber(e.target.value)}
+                        placeholder="0123456789"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 outline-none focus:border-green-500"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {selectedPaymentMethod === 'card' && (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-slate-700">Cardholder name</label>
+                      <input
+                        type="text"
+                        value={cardName}
+                        onChange={(e) => setCardName(e.target.value)}
+                        placeholder="John Doe"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 outline-none focus:border-green-500"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-slate-700">Card number</label>
+                      <input
+                        type="text"
+                        value={cardNumber}
+                        onChange={(e) => setCardNumber(e.target.value)}
+                        placeholder="1234 5678 9012 3456"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 outline-none focus:border-green-500"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex items-center justify-between gap-3 border-t border-slate-200 pt-4">
+                <div>
+                  <p className="text-sm text-slate-500">Total to pay</p>
+                  <p className="text-2xl font-bold text-green-600">₦{grandTotal.toLocaleString()}</p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsPaymentModalOpen(false)}
+                    className="rounded-lg border border-slate-300 px-4 py-2.5 font-semibold text-slate-700 hover:bg-slate-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePaymentSubmit}
+                    className="rounded-lg bg-linear-to-r from-green-600 to-blue-600 px-5 py-2.5 font-semibold text-white shadow-md hover:from-green-700 hover:to-blue-700"
+                  >
+                    Pay Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AuthGuard>
   );
