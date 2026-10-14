@@ -107,11 +107,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
             image: item.image,
             quantity: item.quantity,
             vendorLocation: item.vendorLocation,
-            selectedDeliveryService: item.selectedDeliveryService,
-            // Add other Product fields that might be needed
+            selectedDeliveryService: item.selectedDeliveryService || item.deliveryServices?.[0] || {
+              id: 'dhl',
+              name: 'DHL Express',
+              price: 25600,
+              estimatedDays: '1-2 days'
+            },
             category: item.category || '',
             description: item.description || '',
-            deliveryServices: item.deliveryServices || []
+            deliveryServices: item.deliveryServices || [
+              { id: 'dhl', name: 'DHL Express', price: 25600, estimatedDays: '1-2 days' },
+              { id: 'chowdeck', name: 'Chowdeck', price: 14400, estimatedDays: '2-3 days' },
+              { id: 'ridedeliva', name: 'Ridedeliva', price: 20800, estimatedDays: '1-3 days' }
+            ]
           }));
           setCart(clientCartItems);
           showToast('Cart loaded from your account', 'success');
@@ -170,7 +178,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [...prev, { 
         ...product, 
         quantity: 1, 
-        selectedDeliveryService: product.deliveryServices?.[0]
+        deliveryServices: product.deliveryServices?.length ? product.deliveryServices : [
+          { id: 'dhl', name: 'DHL Express', price: 25600, estimatedDays: '1-2 days' },
+          { id: 'chowdeck', name: 'Chowdeck', price: 14400, estimatedDays: '2-3 days' },
+          { id: 'ridedeliva', name: 'Ridedeliva', price: 20800, estimatedDays: '1-3 days' }
+        ],
+        selectedDeliveryService: product.deliveryServices?.[0] || {
+          id: 'dhl',
+          name: 'DHL Express',
+          price: 25600,
+          estimatedDays: '1-2 days'
+        }
       }];
     });
   };

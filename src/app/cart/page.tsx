@@ -153,7 +153,11 @@ export default function CartPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {cart.map((item) => (
+                    {cart.map((item) => {
+                      const deliveryOptions = item.deliveryServices?.length ? item.deliveryServices : deliveryServices;
+                      const selectedDeliveryId = item.selectedDeliveryService?.id || deliveryOptions[0]?.id || '';
+
+                      return (
                       <tr key={item.id} className="border-b last:border-b-0">
                         <td className="p-4">
                           <div className="flex gap-3 items-center">
@@ -185,14 +189,14 @@ export default function CartPage() {
                         </td>
                         <td className="p-4">
                           <select
-                            value={item.selectedDeliveryService?.id || ''}
+                            value={selectedDeliveryId}
                             onChange={(e) => {
-                              const service = item.deliveryServices.find(s => s.id === e.target.value);
+                              const service = deliveryOptions.find(s => s.id === e.target.value);
                               if (service) updateDeliveryService(item.id, service);
                             }}
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           >
-                            {item.deliveryServices.map((service) => (
+                            {deliveryOptions.map((service) => (
                               <option key={service.id} value={service.id}>
                                 {service.name} - ₦{service.price.toLocaleString()} ({service.estimatedDays})
                               </option>
@@ -231,7 +235,8 @@ export default function CartPage() {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
