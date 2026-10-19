@@ -1,22 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
-import Header from "@/components/Header";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
-  title: "ShopHub - Your Online Store",
-  description: "Browse and shop from our wide selection of products",
+  title: "Leaders Mart — Great finds. Better everyday.",
+  description: "Discover everyday upgrades from sellers you can trust. All in one happy little marketplace.",
 };
 
 export default function RootLayout({
@@ -26,12 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${inter.variable} antialiased`} style={{ fontFamily: "'Inter', sans-serif" }}>
         <CartProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
+          {children}
         </CartProvider>
       </body>
     </html>
