@@ -332,43 +332,48 @@ return (
     }
   };
 
-return (
-  <AuthGuard>
-    <div className="bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white py-8">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-2">My Dashboard</h1>
-          <p className="text-blue-100">Welcome back, {user?.name}!</p>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Scrollable Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden sticky top-8">
-              {/* User Profile Section */}
-              <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-b">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full mx-auto mb-3 flex items-center justify-center text-white text-2xl font-bold">
-                    {user?.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <h3 className="font-bold text-lg text-gray-800">{user?.name}</h3>
-                  <p className="text-sm text-gray-600">{user?.email}</p>
-                </div>
+  return (
+    <AuthGuard>
+      <div className="min-h-screen bg-slate-100 text-slate-800">
+        <div className="bg-gradient-to-r from-violet-700 via-indigo-700 to-blue-600 text-white shadow-sm">
+          <div className="mx-auto max-w-7xl px-4 py-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.38em] text-violet-100">My Account</p>
+                <h1 className="mt-2 text-3xl font-bold">LeadersMart</h1>
               </div>
 
-              {/* Navigation Menu - Scrollable */}
-              <div className="max-h-96 overflow-y-auto">
-                <nav className="p-2">
-                  {sidebarItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 mb-1 flex items-center gap-3 ${activeTab === item.id
-                          ? 'bg-blue-600 text-white shadow-md'
-                          : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+              <div className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-violet-50 backdrop-blur-sm">
+                Welcome back, {user?.name}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 py-8">
+          <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+            <aside className="lg:sticky lg:top-8">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="border-b border-slate-200 bg-gradient-to-br from-violet-50 via-blue-50 to-indigo-50 p-6">
+                  <div className="text-center">
+                    <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-blue-500 text-2xl font-bold text-white shadow-md">
+                      {user?.name.split(' ').map((n) => n[0]).join('')}
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-800">{user?.name}</h3>
+                    <p className="text-sm text-slate-600">{user?.email}</p>
+                  </div>
+                </div>
+
+                <div className="max-h-[32rem] overflow-y-auto p-3">
+                  <nav className="space-y-1">
+                    {sidebarItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-all duration-200 ${
+                          activeTab === item.id
+                            ? 'bg-violet-600 text-white shadow-md'
+                            : 'text-slate-700 hover:bg-violet-50 hover:text-violet-700'
                         }`}
                     >
                       <span className="text-lg">{item.icon}</span>
@@ -378,26 +383,25 @@ return (
                 </nav>
               </div>
 
-              {/* Logout Button */}
-              <div className="p-4 border-t">
-                <button
-                  onClick={signOut}
-                  className="w-full px-4 py-3 bg-red-50 text-red-600 rounded-lg font-medium hover:bg-red-100 transition-colors flex items-center gap-3"
-                >
-                  <span className="text-lg">🚪</span>
-                  <span>Sign Out</span>
-                </button>
+                <div className="border-t border-slate-200 p-4">
+                  <button
+                    onClick={signOut}
+                    className="flex w-full items-center justify-center gap-3 rounded-lg bg-red-50 px-4 py-3 font-medium text-red-600 transition-colors hover:bg-red-100"
+                  >
+                    <span className="text-lg">🚪</span>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
+            </aside>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {renderContent()}
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              {renderContent()}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </AuthGuard>
-);
+    </AuthGuard>
+  );
 }
