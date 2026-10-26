@@ -6,6 +6,14 @@ import { useState, type FormEvent } from 'react';
 import { Roboto } from 'next/font/google';
 import { useCart } from '@/context/CartContext';
 import { categories } from '@/data/categories';
+import {
+  featuresMenu,
+  featuresBanners,
+  collectionsMenu,
+  pagesMenu,
+  type BadgeType,
+} from '@/data/megaMenu';
+import Image from 'next/image';
 
 /* The template uses Roboto at 400 weight everywhere */
 const roboto = Roboto({
@@ -17,18 +25,23 @@ const roboto = Roboto({
 /* Full-width wrapper: 15px side padding, exactly like the template */
 const WRAP = 'mx-auto w-full max-w-[1920px] px-[15px]';
 
-const RED = 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent';
+const GRADIENT = 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600';
+const RED = `${GRADIENT} bg-clip-text text-transparent`;
+/* Same gradient text, but only while the parent `.group` is hovered / focused */
+const RED_ON_GROUP_HOVER =
+  'group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:via-indigo-600 group-hover:to-purple-600 group-hover:bg-clip-text group-hover:text-transparent group-focus-within:bg-gradient-to-r group-focus-within:from-blue-600 group-focus-within:via-indigo-600 group-focus-within:to-purple-600 group-focus-within:bg-clip-text group-focus-within:text-transparent';
 const RED_BG = 'bg-[#ff3b4e]';
 
-type NavItem = { label: string; href: string; hasDropdown?: boolean };
+type MenuKey = 'features' | 'collections' | 'pages';
+type NavItem = { label: string; href: string; hasDropdown?: boolean; menu?: MenuKey };
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', href: '/' },
   { label: 'Shop', href: '/categories', hasDropdown: true },
-  { label: "Today's Deals", href: '/deals' },
-  { label: 'New Arrivals', href: '/new-arrivals' },
+  { label: 'Features', href: '/shop', hasDropdown: true, menu: 'features' },
+  { label: 'Collections', href: '/categories', hasDropdown: true, menu: 'collections' },
+  { label: 'Pages', href: '/about', hasDropdown: true, menu: 'pages' },
   { label: 'Blog', href: '/blog', hasDropdown: true },
-  { label: 'Help', href: '/help' },
   { label: 'About Us', href: '/about' },
 ];
 
@@ -38,6 +51,14 @@ function Caret({ className = '' }: { className?: string }) {
   return (
     <svg className={`w-2 h-1 shrink-0 ${className}`} viewBox="0 0 10 5" fill="currentColor" aria-hidden="true">
       <path d="M0 0h10L5 5z" />
+    </svg>
+  );
+}
+
+function ChevronRight() {
+  return (
+    <svg className="w-[7px] h-[10px] shrink-0 text-[#999]" viewBox="0 0 7 10" fill="none" stroke="currentColor" strokeWidth={1.4} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 1l4 4-4 4" />
     </svg>
   );
 }
@@ -126,6 +147,175 @@ function LogoMark() {
   );
 }
 
+/* ---------------------------- mega menu pieces -------------------------- */
+
+const BADGE_COLOR: Record<BadgeType, string> = {
+  HOT: '#f57c00',
+  NEW: '#1b8db5',
+};
+
+/* Small speech-bubble tag that sits at the top-right of the link text */
+function Badge({ type }: { type: BadgeType }) {
+  return (
+    <span
+      className="relative -top-[7px] ml-[3px] inline-block rounded-[2px] px-[5px] py-[1px] text-[8px] font-bold leading-[11px] text-white"
+      style={{ backgroundColor: BADGE_COLOR[type] }}
+      aria-hidden="true"
+    >
+      {type}
+      <span
+        className="absolute left-[3px] -bottom-[3px] h-0 w-0 border-x-[3px] border-t-[4px] border-x-transparent"
+        style={{ borderTopColor: BADGE_COLOR[type] }}
+      />
+    </span>
+  );
+}
+
+/* Shared panel shell: hidden until the parent `.group` is hovered or focused */
+const PANEL_BASE =
+  'invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity duration-150 absolute top-full z-50 bg-white border border-[#e8e8e8] shadow-[0_6px_18px_rgba(0,0,0,0.08)]';
+
+const MENU_LINK = 'text-[13.5px] text-[#777] hover:text-[#222] transition-colors';
+
+function FeaturesPanel() {
+  return (
+    <div className={`${PANEL_BASE} right-[15px] w-[min(918px,calc(100%-300px))] px-[35px] pt-[30px] pb-[22px]`}>
+      <div className="grid grid-cols-4 gap-x-[30px]">
+        {featuresMenu.map((col) => (
+          <div key={col.title}>
+            <h3 className="mb-3 text-[16px] font-medium uppercase leading-[24px] text-[#222]">{col.title}</h3>
+            <ul>
+              {col.links.map((l) => (
+                <li key={l.label} className="flex h-[34px] items-center justify-between">
+                  <Link href={l.href} className={`${MENU_LINK} whitespace-nowrap`}>
+                    {l.label}
+                    {l.badge && <Badge type={l.badge} />}
+                  </Link>
+                  {l.hasSub && <ChevronRight />}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* Two promo banners (pure CSS, no images needed) */}
+      <div className="mt-[22px] grid grid-cols-2 gap-[30px]">
+        {featuresBanners.map((b, i) => (
+          <Link
+            key={i}
+            href={b.href}
+            className="relative flex h-[68px] items-center overflow-hidden bg-[#f1c40f] pl-5"
+          >
+            <span className="relative z-10 flex flex-col items-start gap-1">
+              <span className="text-[16px] font-bold leading-none text-white">{b.title}</span>
+              <span className="rounded-full bg-[#1b8db5] px-4 py-[3px] text-[9px] font-bold leading-none text-white">
+                {b.cta}
+              </span>
+            </span>
+            <span className="absolute inset-y-0 right-0 w-[48%] skew-x-[-18deg] translate-x-6 bg-gradient-to-r from-[#2b9fb0] to-[#2a7f8f]" aria-hidden="true" />
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CollectionsPanel() {
+  return (
+    <div className={`${PANEL_BASE} right-[15px] w-[min(868px,calc(100%-300px))] p-[30px]`}>
+      <div className="grid grid-cols-4 gap-x-[30px]">
+        {collectionsMenu.map((col) => (
+          <div key={col.title}>
+            <Link href={col.href} className="block">
+              {/* grey box shows until the image file exists */}
+              <div className="aspect-[360/252] w-full overflow-hidden bg-[#ececec]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={col.image}
+                  alt={col.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+              <h3 className="mt-5 border-b border-[#e8e8e8] pb-3 text-[14px] font-medium uppercase leading-none text-[#222]">
+                {col.title}
+              </h3>
+            </Link>
+            <ul className="mt-3">
+              {col.links.map((l) => (
+                <li key={l.label} className="py-[5px]">
+                  <Link href={l.href} className={MENU_LINK}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PagesPanel() {
+  return (
+    <div className={`${PANEL_BASE} left-[-14px] w-[358px] px-[30px] py-[30px]`}>
+      <div className="grid grid-cols-2 gap-x-[30px]">
+        {pagesMenu.map((col, i) => (
+          <ul key={i}>
+            {col.map((l) => (
+              <li key={l.label} className="flex h-[30px] items-center">
+                <Link href={l.href} className={`${MENU_LINK} whitespace-nowrap`}>
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MenuPanel({ menu }: { menu: MenuKey }) {
+  if (menu === 'features') return <FeaturesPanel />;
+  if (menu === 'collections') return <CollectionsPanel />;
+  return <PagesPanel />;
+}
+
+/* Mobile: collapsible lists built from the same data */
+function MobileSub({ menu, onNavigate }: { menu: MenuKey; onNavigate: () => void }) {
+  const groups: { title: string; links: { label: string; href: string }[] }[] =
+    menu === 'features'
+      ? featuresMenu
+      : menu === 'collections'
+        ? collectionsMenu.map((c) => ({ title: c.title, links: c.links }))
+        : [{ title: 'Pages', links: pagesMenu.flat() }];
+
+  return (
+    <div className="pb-3 pl-3">
+      {groups.map((g) => (
+        <div key={g.title} className="mb-2">
+          <p className="py-1 text-xs font-medium uppercase text-[#222]">{g.title}</p>
+          <ul>
+            {g.links.map((l) => (
+              <li key={`${g.title}-${l.label}`}>
+                <Link href={l.href} onClick={onNavigate} className="block py-1.5 text-[13px] text-[#777]">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ------------------------------ component ------------------------------- */
 
 export default function Header() {
@@ -153,7 +343,6 @@ export default function Header() {
   return (
     <header className={`${roboto.className} sticky top-0 z-50 bg-white text-[#222]`}>
       {/* ============================ TOP BAR ============================ */}
-      {/* 46px tall grey strip, text row sits at the top (34px) like the template */}
       <div className="hidden md:block h-[46px] bg-[#f8f8f8] text-[13px] leading-none text-[#222]">
         <div className={`${WRAP} h-[34px] flex items-center justify-between`}>
           <div className="flex items-center gap-6">
@@ -161,7 +350,7 @@ export default function Header() {
 
             <a href="mailto:design@domain.com" className="flex items-center gap-1 hover:text-[#ff3b4e] transition-colors">
               <MailIcon />
-              <span className="ml-0.5">Email: design@domain.com</span>
+              <span className="ml-0.5">Email: eleadersmart@gmail.com</span>
             </a>
 
             <a href="tel:+8884344600" className="hidden lg:flex items-center gap-1 hover:text-[#ff3b4e] transition-colors">
@@ -177,7 +366,7 @@ export default function Header() {
               <Caret />
             </button>
             <button type="button" className="flex items-center gap-1.5 hover:text-[#ff3b4e] transition-colors">
-              <span>$ US Dollar</span>
+              <span>₦ Nigeria Naira</span>
               <Caret />
             </button>
           </div>
@@ -187,13 +376,15 @@ export default function Header() {
       {/* ============================ MAIN ROW =========================== */}
       <div className="border-b border-[#e8e8e8]">
         <div className={`${WRAP} flex items-center h-[72px] md:h-[116px]`}>
-          {/* Logo (its column is 301px wide on desktop so the search starts at the template position) */}
-          <Link href="/" aria-label="ShopHub home" className="shrink-0 flex items-center gap-[6px] lg:w-[clamp(240px,22vw,301px)]">
-            <LogoMark />
-            <span className="text-[36px] leading-none font-black tracking-[-0.02em]">
-              <span className={RED}>Leaders</span>
-              <span className="text-[#2f2e4a]">Mart</span>
-            </span>
+         <Link href="/" aria-label="LeadersMart home" className="shrink-0 flex items-center lg:w-[clamp(240px,22vw,301px)]">
+            <Image
+              src="/images/leaders_mart_logo.png"
+              alt="LeadersMart"
+              width={300}
+              height={100}
+              priority
+              className="h-[80px] w-auto"
+            />
           </Link>
 
           {/* Search pill: 514 x 44 */}
@@ -230,7 +421,7 @@ export default function Header() {
             <button
               type="submit"
               aria-label="Search"
-              className={`w-[68px] shrink-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center hover:bg-[#e62e41] transition-colors`}
+              className={`w-[68px] shrink-0 ${GRADIENT} text-white flex items-center justify-center hover:opacity-90 transition-opacity`}
             >
               <SearchIcon />
             </button>
@@ -238,19 +429,16 @@ export default function Header() {
 
           {/* Cart / Wish list / Account */}
           <div className="ml-auto flex items-center gap-5 lg:gap-[34px] lg:pr-[clamp(0px,2vw,28px)] text-[14px]">
-            {/* Cart */}
             <Link href="/cart" className="relative flex items-center gap-3 hover:text-[#ff3b4e] transition-colors">
               <BasketIcon />
-              {/* small badge on icon (below lg) */}
               <span
                 className={`lg:hidden absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full ${RED_BG} text-white text-[11px] font-medium flex items-center justify-center`}
               >
                 {totalItems}
               </span>
-              {/* badge above text (lg and up) */}
               <span className="hidden lg:flex flex-col items-start gap-[3px] pt-[2px]">
                 <span
-                  className={`min-w-[27px] h-[17px] px-2 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white text-[11px] font-medium leading-none flex items-center justify-center`}
+                  className={`min-w-[27px] h-[17px] px-2 rounded-full ${GRADIENT} text-white text-[11px] font-medium leading-none flex items-center justify-center`}
                 >
                   {totalItems}
                 </span>
@@ -258,13 +446,11 @@ export default function Header() {
               </span>
             </Link>
 
-            {/* Wish list */}
             <Link href="/wishlist" className="hidden sm:flex items-center gap-[15px] hover:text-[#ff3b4e] transition-colors">
               <HeartIcon />
               <span className="hidden lg:inline whitespace-nowrap">Wish List ({wishlistCount})</span>
             </Link>
 
-            {/* Account */}
             <div className="hidden sm:flex items-center gap-[15px]">
               <UserIcon />
               <div className="hidden lg:flex flex-col leading-[20px] whitespace-nowrap">
@@ -277,7 +463,6 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Mobile menu toggle */}
             <button
               type="button"
               className="lg:hidden p-1"
@@ -295,7 +480,7 @@ export default function Header() {
 
       {/* Mobile search */}
       <form onSubmit={handleSearch} className="md:hidden px-4 py-3 border-b border-[#e8e8e8]">
-        <div className="flex h-10 rounded-full border-2 border-[#ff3b4e] overflow-hidden">
+        <div className="flex h-10 rounded-full border-2 border-[#2563eb] overflow-hidden">
           <input
             type="text"
             value={query}
@@ -303,7 +488,7 @@ export default function Header() {
             placeholder="Search"
             className="flex-1 min-w-0 px-4 text-sm outline-none"
           />
-          <button type="submit" aria-label="Search" className={`w-12 ${RED_BG} text-white flex items-center justify-center`}>
+          <button type="submit" aria-label="Search" className={`w-12 ${GRADIENT} text-white flex items-center justify-center`}>
             <SearchIcon />
           </button>
         </div>
@@ -311,8 +496,9 @@ export default function Header() {
 
       {/* ========================== NAVIGATION ROW ======================= */}
       <div className="hidden lg:block border-b border-[#e8e8e8]">
-        <div className={`${WRAP} h-[40px] flex items-stretch`}>
-          {/* All Categories box: 270px wide, red underline */}
+        {/* `relative` here is what Features / Collections panels anchor to */}
+        <div className={`${WRAP} relative h-[40px] flex items-stretch`}>
+          {/* All Categories box */}
           <div className="relative group w-[clamp(210px,19.8vw,270px)] shrink-0">
             <button
               type="button"
@@ -329,7 +515,7 @@ export default function Header() {
                 <Link
                   key={c.id}
                   href={`/categories/${c.slug}`}
-                  className="block px-5 py-2.5 text-[14px] text-[#333] border-b last:border-b-0 border-  hover:text-[#ff3b4e] hover:bg-[#fafafa] transition-colors"
+                  className="block px-5 py-2.5 text-[14px] text-[#333] border-b last:border-b-0 border-[#f0f0f0] hover:text-[#ff3b4e] hover:bg-[#fafafa] transition-colors"
                 >
                   {c.name}
                 </Link>
@@ -337,26 +523,36 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Main links: 14px uppercase, 32px apart, never wrap */}
+          {/* Main links: items are full row height so the pointer never leaves the hover area */}
           <nav
-            className="ml-[clamp(20px,3.4vw,46px)] flex items-center gap-[clamp(16px,2.34vw,32px)] whitespace-nowrap"
+            className="ml-[clamp(20px,3.4vw,46px)] flex items-stretch gap-[clamp(16px,2.34vw,32px)] whitespace-nowrap"
             aria-label="Main"
           >
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`flex items-center gap-[6px] text-[14px] uppercase leading-none transition-colors hover:text-[#ff3b4e] ${
-                  isActive(item.href) ? RED : 'text-[#222]'
-                }`}
-              >
-                {item.label}
-                {item.hasDropdown && <Caret />}
-              </Link>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.href);
+              const isPages = item.menu === 'pages';
+              return (
+                <div
+                  key={item.label}
+                  /* Pages panel anchors to its own link; the other two anchor to the row */
+                  className={`group flex items-stretch ${isPages ? 'relative' : ''}`}
+                >
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-[6px] text-[14px] uppercase leading-none transition-colors ${
+                      active ? RED : `text-[#222] ${RED_ON_GROUP_HOVER} hover:text-[#ff3b4e]`
+                    }`}
+                  >
+                    {item.label}
+                    {item.hasDropdown && <Caret />}
+                  </Link>
+                  {item.menu && <MenuPanel menu={item.menu} />}
+                </div>
+              );
+            })}
           </nav>
 
-          {/* Special offers: 140 x 30, dashed border */}
+          {/* Special offers */}
           <div className="ml-auto flex items-center pl-4">
             <Link
               href="/deals"
@@ -370,19 +566,34 @@ export default function Header() {
 
       {/* ============================ MOBILE MENU ======================== */}
       {mobileOpen && (
-        <nav className="lg:hidden border-b border-[#e8e8e8] bg-white" aria-label="Mobile">
+        <nav className="lg:hidden max-h-[70vh] overflow-y-auto border-b border-[#e8e8e8] bg-white" aria-label="Mobile">
           <ul className="px-4 py-2 divide-y divide-[#f0f0f0]">
             {NAV_ITEMS.map((item) => (
               <li key={item.label}>
-                <Link
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`block py-3 text-sm uppercase ${isActive(item.href) ? RED : 'text-[#222]'}`}
-                >
-                  {item.label}
-                </Link>
+                {item.menu ? (
+                  <details className="group/m">
+                    <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-sm uppercase text-[#222]">
+                      {item.label}
+                      <Caret className="transition-transform group-open/m:rotate-180" />
+                    </summary>
+                    <MobileSub menu={item.menu} onNavigate={() => setMobileOpen(false)} />
+                  </details>
+                ) : (
+                  <Link
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block py-3 text-sm uppercase ${isActive(item.href) ? RED : 'text-[#222]'}`}
+                  >
+                    {item.label}
+                  </Link>
+                )}
               </li>
             ))}
+            <li>
+              <Link href="/deals" onClick={() => setMobileOpen(false)} className="block py-3 text-sm uppercase">
+                Special Offers
+              </Link>
+            </li>
             <li>
               <Link href="/login" onClick={() => setMobileOpen(false)} className="block py-3 text-sm uppercase">
                 Login / Register
