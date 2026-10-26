@@ -395,10 +395,7 @@ return (
               </div>
             </aside>
 
-            {/* Main Content */}
-            <div className="lg:col-span-3">
-              {renderContent()}
-            </div>
+            <main>{renderContent()}</main>
           </div>
         </div>
       </div>
