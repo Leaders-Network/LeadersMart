@@ -36,7 +36,7 @@ const categoryData = [
   { name: 'Others', value: 10, color: '#10b981' }
 ];
 
-const StatCard = ({ title, value, change, icon: Icon }) => {
+const StatCard = ({ title, value, change, icon: Icon }: { title: string; value: string; change: number; icon: React.ElementType }) => {
   const isPositive = change >= 0;
   
   return (
@@ -78,10 +78,10 @@ const AdminDashboard = () => {
   const [timeRange, setTimeRange] = useState('12M');
   
   const stats = [
-    { title: "Total Revenue", value: 2450300, change: 12.5, icon: DollarSign },
-    { title: "Total Orders", value: 1500, change: 8.3, icon: ShoppingCart },
-    { title: "Total Customers", value: 800, change: -3.2, icon: Users },
-    { title: "Total Products", value: 124, change: 5.4, icon: Package }
+    { title: "Total Revenue", value: "₦2,450,300", change: 12.5, icon: DollarSign },
+    { title: "Total Orders", value: "1,500", change: 8.3, icon: ShoppingCart },
+    { title: "Total Customers", value: "800", change: -3.2, icon: Users },
+    { title: "Total Products", value: "124", change: 5.4, icon: Package }
   ];
   
   return (

@@ -159,7 +159,7 @@ const Vendors = () => {
   const statuses = ['All', 'active', 'pending', 'inactive'];
   const categories = ['All', 'Electronics', 'Accessories', 'Peripherals'];
 
-  const getStatusConfig = (status) => {
+  const getStatusConfig = (status: string) => {
     switch(status) {
       case 'active':
         return { bg: 'bg-green-50', text: 'text-green-700', icon: CheckCircle, label: 'Active' };
@@ -172,7 +172,7 @@ const Vendors = () => {
     }
   };
 
-  const getReliabilityColor = (reliability) => {
+  const getReliabilityColor = (reliability: number) => {
     if (reliability >= 95) return 'text-green-600';
     if (reliability >= 85) return 'text-blue-600';
     if (reliability >= 75) return 'text-yellow-600';

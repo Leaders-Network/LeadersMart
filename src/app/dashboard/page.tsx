@@ -8,7 +8,7 @@ export default function DashboardPage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white py-8">
+      <div className="bg-gradient-to-r from-[#4B4FED] via-[#8B52D7] to-[#C7449A] text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-2">My Dashboard</h1>
           <p className="text-blue-100">Welcome back, John!</p>
@@ -132,7 +132,7 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-gray-500 text-sm">Total Spent</p>
-                        <p className="text-3xl font-bold text-blue-900">$2,450</p>
+                        <p className="text-3xl font-bold text-blue-900">₦2,450</p>
                       </div>
                       <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                         <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -22,7 +22,7 @@ export default function ProductCardSimple({ product }: { product: Product }) {
         </div>
       </Link>
       <Link href={`/products/${product.id}`}>
-        <h3 className="font-semibold text-base mb-2 line-clamp-2 h-12 hover:text-blue-600 transition-colors">
+        <h3 className="font-semibold text-base mb-2 line-clamp-2 h-12 hover:text-[#8B52D7] transition-colors">
           {product.name}
         </h3>
       </Link>
@@ -34,12 +34,12 @@ export default function ProductCardSimple({ product }: { product: Product }) {
       </div>
       <div className="mt-auto">
         <p className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          ${product.price}
+          ₦{product.price}
         </p>
-        <p className="text-xs text-gray-400 line-through mb-3">${(product.price * 1.3).toFixed(2)}</p>
+        <p className="text-xs text-gray-400 line-through mb-3">₦{(product.price * 1.3).toFixed(2)}</p>
         <button
           onClick={() => addToCart(product)}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm"
+          className="w-full bg-[#8B52D7] text-white py-2 rounded-lg hover:bg-[#7642C3] transition-colors font-semibold text-sm"
         >
           Add to Cart
         </button>

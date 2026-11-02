@@ -111,7 +111,7 @@ const ProductPage = () => {
   const categories = ['All', 'Electronics', 'Accessories', 'Peripherals'];
   const statuses = ['All', 'active', 'low', 'out'];
 
-  const getStatusConfig = (status) => {
+  const getStatusConfig = (status: string) => {
     switch(status) {
       case 'active':
         return { bg: 'bg-green-50', text: 'text-green-700', icon: CheckCircle, label: 'In Stock' };

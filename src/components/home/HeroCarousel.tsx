@@ -29,20 +29,44 @@ type Slide = {
 
 const SLIDES: Slide[] = [
   {
-    id: 1,
-    image: '/images/hero/stock_item_hero_display1.jpg',
+    id: 1, 
+    image: '/images/hero/slider-2.jpg',
     alt: 'Special offer sale, up to 70% off',
     href: '/deals',
   },
   {
-    id: 2,
-    image: '/images/hero/stock_item_hero_display2.png',
+    id: 2, 
+    image: '/images/hero/stock_item_hero_display1.jpg',
     alt: 'New arrivals for your home',
     href: '/new-arrivals',
   },
   {
     id: 3,
-    image: '/images/hero/slide_item_hero_display2.jpg',
+    image: '/images/hero/stock_item_hero_display2.png',
+    alt: 'Shop all categories',
+    href: '/categories',
+  },
+  {
+    id: 4,
+    image: '/images/hero/slide-1.jpg',
+    alt: 'Shop all categories',
+    href: '/categories',
+  },
+  {
+    id: 5,
+    image: '/images/hero/hercourousel.jpg',
+    alt: 'Shop all categories',
+    href: '/categories',
+  },
+  {
+    id: 6,
+    image: '/images/hero/slide-3.jpg',
+    alt: 'Shop all categories',
+    href: '/categories',
+  },
+    {
+    id: 7,
+    image: '/images/hero/slide3.jpg',
     alt: 'Shop all categories',
     href: '/categories',
   },
@@ -50,7 +74,7 @@ const SLIDES: Slide[] = [
 
 const AUTOPLAY_MS = 5000;
 const SWIPE_PX = 50;
-const GRADIENT = 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600';
+const GRADIENT = 'bg-gradient-to-r from-[#4B4FED] via-[#8B52D7] to-[#C7449A]';
 
 function Chevron({ dir }: { dir: 'left' | 'right' }) {
   return (

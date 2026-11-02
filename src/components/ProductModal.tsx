@@ -82,9 +82,9 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
               <div className="mb-6">
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    ${product.price}
+                    ₦{product.price}
                   </span>
-                  <span className="text-xl text-gray-400 line-through">${(product.price * 1.3).toFixed(2)}</span>
+                  <span className="text-xl text-gray-400 line-through">₦{(product.price * 1.3).toFixed(2)}</span>
                   <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                     -23%
                   </span>
@@ -143,7 +143,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
                 >
                   Add to Cart
                 </button>
-                <button className="px-6 py-4 border-2 border-blue-600 text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-colors">
+                <button className="px-6 py-4 border-2 border-[#8B52D7] text-[#8B52D7] rounded-xl font-bold hover:bg-[#F5F3FF] transition-colors">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>

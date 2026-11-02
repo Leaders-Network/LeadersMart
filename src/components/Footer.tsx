@@ -1,115 +1,272 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
+import NewsletterForm from '@/components/NewsletterForm';
+import { contact, footerColumns, searchTags, socials } from '@/data/footer';
+
+/* Page background is dark navy; these are the shades used on it */
+const BG = 'bg-[#23233f]';
+const TEXT = 'text-[#c9c9d6]';
+const ACCENT = 'text-indigo-400'; /* the template's red, swapped for a brand colour that reads on dark */
+const FOOT_WRAP = 'mx-auto w-full max-w-[1920px] px-[15px] sm:px-[30px] xl:px-[45px]';
+
+/* ------------------------------- small icons ----------------------------- */
+
+const strokeProps = {
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+} as const;
+
+function ContactIcon({ children }: { children: ReactNode }) {
+  return (
+    <svg className={`mr-[9px] h-3 w-3 shrink-0 ${ACCENT}`} viewBox="0 0 24 24" {...strokeProps} aria-hidden="true">
+      {children}
+    </svg>
+  );
+}
+
+function SocialIcon({ id }: { id: (typeof socials)[number]['id'] }) {
+  const common = { className: 'h-[14px] w-[14px]', viewBox: '0 0 24 24', 'aria-hidden': true } as const;
+  switch (id) {
+    case 'facebook':
+      return (
+        <svg {...common} fill="currentColor">
+          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+        </svg>
+      );
+    case 'youtube':
+      return (
+        <svg {...common} fill="currentColor">
+          <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17z" />
+          <path d="m10 15 5-3-5-3z" fill="#ed1c2f" />
+        </svg>
+      );
+    case 'twitter':
+      return (
+        <svg {...common} fill="currentColor">
+          <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+        </svg>
+      );
+    case 'google':
+      return <span className="text-[12px] font-bold leading-none">G+</span>;
+    case 'instagram':
+      return (
+        <svg {...common} {...strokeProps}>
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <path d="M17.5 6.5h.01" />
+        </svg>
+      );
+    case 'pinterest':
+      return (
+        <svg {...common} {...strokeProps}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M10 17l2-9a2.5 2.5 0 1 1 1 4.6" />
+        </svg>
+      );
+  }
+}
+
+function MailRocketIcon() {
+  return (
+    <svg className="h-[42px] w-[78px] shrink-0 text-white" viewBox="0 0 78 42" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="26" y="3" width="50" height="36" rx="1" />
+      <path d="M26 3l25 21L76 3M26 39l17-17M76 39L59 22" />
+      <path d="M2 12h18M8 21h14M2 30h18" />
+    </svg>
+  );
+}
+
+/* ------------------------------ app + payments --------------------------- */
+/* Simple text badges so nothing depends on image files. Swap for official badge images if you like. */
+
+function AppStoreBadge() {
+  return (
+    <a href="#" aria-label="Download on the App Store" className="flex h-[34px] w-[94px] flex-col justify-center rounded-[4px] border border-white/80 bg-black pl-3 leading-none text-white">
+      <span className="text-[6px]">Download on the</span>
+      <span className="mt-[2px] text-[13px] font-medium">App Store</span>
+    </a>
+  );
+}
+
+function GooglePlayBadge() {
+  return (
+    <a href="#" aria-label="Get it on Google Play" className="flex h-[34px] w-[97px] items-center gap-[6px] rounded-[4px] border border-white/80 bg-black pl-[10px] leading-none text-white">
+      <svg className="h-[18px] w-[16px] shrink-0" viewBox="0 0 16 18" aria-hidden="true">
+        <path d="M1 1l9 8-9 8z" fill="#4fc3f7" />
+        <path d="M1 1l11 6.2-2 1.8z" fill="#66bb6a" />
+        <path d="M1 17l11-6.2-2-1.8z" fill="#ef5350" />
+        <path d="M12 7.2l3 1.8-3 1.8-2-1.8z" fill="#ffca28" />
+      </svg>
+      <span className="flex flex-col">
+        <span className="text-[5.5px] uppercase">Android app on</span>
+        <span className="mt-[2px] text-[12px]">Google play</span>
+      </span>
+    </a>
+  );
+}
+
+const PAYMENTS = [
+  { name: 'Maestro', cls: 'bg-[#1f4e9c] text-white italic', text: 'maestro' },
+  { name: 'PayPal', cls: 'bg-[#e8f1fb] text-[#1c3f94] italic font-bold', text: 'PayPal' },
+  { name: 'Western Union', cls: 'bg-black text-[#f5c518] border border-[#f5c518] font-bold', text: 'WU' },
+  { name: 'Visa', cls: 'bg-white text-[#1a1f71] italic font-bold', text: 'VISA' },
+  { name: 'Cirrus', cls: 'bg-[#1a5da6] text-white', text: 'Cirrus' },
+  { name: 'eBay', cls: 'bg-[#f5c518] text-[#222] font-bold', text: 'ebay' },
+];
+
+/* ------------------------------- pieces ---------------------------------- */
+
+function Heading({ children, line = 'h-px bg-[#5a5a75]' }: { children: ReactNode; line?: string }) {
+  return (
+    <>
+      <h3 className="text-[14px] font-bold uppercase leading-5 text-white">{children}</h3>
+      <span className={`mt-[11px] block w-[25px] ${line}`} />
+    </>
+  );
+}
+
+/* -------------------------------- footer -------------------------------- */
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      {/* Main Footer */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          {/* Company Info */}
-          <div className="lg:col-span-2">
-            <h3 className="text-2xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              ShopHub
-            </h3>
-            <p className="text-gray-400 mb-4">
-              Your trusted online marketplace for quality products at unbeatable prices. Shop with confidence and enjoy fast, free delivery.
-            </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <a href="#" className="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                </svg>
-              </a>
-              <a href="#" className="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700 transition-colors">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
-                </svg>
-              </a>
-              <a href="#" className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-              </a>
-            </div>
-          </div>
+    <footer className={`${BG} ${TEXT}`}>
+      {/* ====== top: contact + 4 link columns ====== */}
+      <div className={`${FOOT_WRAP} pt-[42px]`}>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-[42.45%_14.86%_14.86%_14.86%_1fr] lg:gap-x-0">
+          {/* contact */}
+          <div className="col-span-2 lg:col-span-1">
+            <Heading>Contact Us</Heading>
+            <ul className="mt-[14px] text-[12px]">
+              <li className="flex h-[33px] items-center">
+                <ContactIcon>
+                  <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+                  <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                </ContactIcon>
+                <strong className="mr-[6px] font-bold text-white">Address:</strong>
+                <span>{contact.address}</span>
+              </li>
+              <li className="flex h-[33px] items-center">
+                <ContactIcon>
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </ContactIcon>
+                <strong className="mr-[6px] font-bold text-white">Hotline:</strong>
+                <a href={`tel:${contact.hotline.split(' ')[0].replace(/[^\d+]/g, '')}`} className="hover:text-white">
+                  {contact.hotline}
+                </a>
+              </li>
+              <li className="flex h-[33px] items-center">
+                <ContactIcon>
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </ContactIcon>
+                <strong className="mr-[6px] font-bold text-white">Email:</strong>
+                <a href={`mailto:${contact.email}`} className="hover:text-white">
+                  {contact.email}
+                </a>
+              </li>
+              <li className="flex h-[33px] items-center">
+                <ContactIcon>
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </ContactIcon>
+                <strong className="mr-[6px] font-bold text-white">Open Time:</strong>
+                <span>{contact.openTime}</span>
+              </li>
+            </ul>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-bold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li><Link href="/" className="hover:text-blue-400 transition-colors">Home</Link></li>
-              <li><Link href="/categories" className="hover:text-blue-400 transition-colors">All Categories</Link></li>
-              <li><Link href="/deals" className="hover:text-blue-400 transition-colors">Today's Deals</Link></li>
-              <li><Link href="/new-arrivals" className="hover:text-blue-400 transition-colors">New Arrivals</Link></li>
-              <li><Link href="/best-sellers" className="hover:text-blue-400 transition-colors">Best Sellers</Link></li>
+            <ul className="mt-[24px] flex gap-2">
+              {socials.map((s) => (
+                <li key={s.id}>
+                  <a
+                    href={s.href}
+                    aria-label={s.label}
+                    className={`flex h-8 w-8 items-center justify-center rounded-[2px] text-white transition-opacity hover:opacity-85 ${s.bg}`}
+                  >
+                    <SocialIcon id={s.id} />
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Customer Service */}
-          <div>
-            <h4 className="text-white font-bold mb-4">Customer Service</h4>
-            <ul className="space-y-2">
-              <li><Link href="/help" className="hover:text-blue-400 transition-colors">Help Center</Link></li>
-              <li><Link href="/track-order" className="hover:text-blue-400 transition-colors">Track Order</Link></li>
-              <li><Link href="/returns" className="hover:text-blue-400 transition-colors">Returns</Link></li>
-              <li><Link href="/shipping" className="hover:text-blue-400 transition-colors">Shipping Info</Link></li>
-              <li><Link href="/contact" className="hover:text-blue-400 transition-colors">Contact Us</Link></li>
-            </ul>
-          </div>
-
-          {/* My Account */}
-          <div>
-            <h4 className="text-white font-bold mb-4">My Account</h4>
-            <ul className="space-y-2">
-              <li><Link href="/account" className="hover:text-blue-400 transition-colors">My Account</Link></li>
-              <li><Link href="/orders" className="hover:text-blue-400 transition-colors">Order History</Link></li>
-              <li><Link href="/wishlist" className="hover:text-blue-400 transition-colors">Wishlist</Link></li>
-              <li><Link href="/newsletter" className="hover:text-blue-400 transition-colors">Newsletter</Link></li>
-              <li><Link href="/rewards" className="hover:text-blue-400 transition-colors">Rewards</Link></li>
-            </ul>
-          </div>
+          {/* link columns */}
+          {footerColumns.map((col) => (
+            <nav key={col.title} aria-label={col.title}>
+              <Heading>{col.title}</Heading>
+              <ul className="mt-3">
+                {col.links.map((l) => (
+                  <li key={l.label} className="flex h-[29px] items-center">
+                    <Link href={l.href} className="text-[12px] transition-colors hover:text-white">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
         </div>
 
-        {/* Newsletter */}
-        <div className="mt-12 pt-8 border-t border-gray-800">
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-2xl font-bold text-white mb-2">Subscribe to Our Newsletter</h3>
-            <p className="text-gray-400 mb-6">Get exclusive deals, new arrivals, and special offers delivered to your inbox!</p>
-            <div className="flex gap-2 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                className="flex-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500 text-white"
-              />
-              <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-700 transition-all">
-                Subscribe
-              </button>
-            </div>
-          </div>
+        <div className="mt-[43px] border-t border-[#3a3a55]" />
+
+        {/* ====== most searched ====== */}
+        <div className="pb-[49px] pt-[43px]">
+          <Heading line="h-[2px] bg-indigo-400">Most Searched on LeadersMart</Heading>
+          <ul className="mt-[22px] flex flex-wrap gap-[5px]">
+            {searchTags.map((t, i) => (
+              <li key={`${t}-${i}`}>
+                <Link
+                  href={`/search?q=${encodeURIComponent(t)}`}
+                  className="inline-flex h-6 items-center rounded-[2px] bg-[#35354f] px-[13px] text-[11px] font-medium text-white transition-colors hover:bg-[#46466a]"
+                >
+                  {t}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="bg-gray-950 py-6">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm">© 2024 ShopHub. All rights reserved.</p>
-            <div className="flex gap-6 text-sm">
-              <Link href="/privacy" className="text-gray-400 hover:text-blue-400 transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="text-gray-400 hover:text-blue-400 transition-colors">Terms of Service</Link>
-              <Link href="/cookies" className="text-gray-400 hover:text-blue-400 transition-colors">Cookie Policy</Link>
-            </div>
-            <div className="flex gap-4">
-              <img src="/payment-visa.svg" alt="Visa" className="h-8 opacity-70" />
-              <img src="/payment-mastercard.svg" alt="Mastercard" className="h-8 opacity-70" />
-              <img src="/payment-paypal.svg" alt="PayPal" className="h-8 opacity-70" />
-            </div>
+      {/* ====== newsletter band ====== */}
+      <div className="bg-[#2d2d49]">
+        <div className={`${FOOT_WRAP} flex min-h-[82px] flex-col items-start justify-between gap-4 py-5 md:flex-row md:items-center md:py-0`}>
+          <div className="flex items-center gap-[43px]">
+            <MailRocketIcon />
+            <p className="text-[13px] font-medium uppercase leading-5 text-white">
+              Sign up for newsletter &amp; get <strong className="font-bold">20% off</strong> first order
+            </p>
           </div>
+          <NewsletterForm />
+        </div>
+      </div>
+
+      {/* ====== bottom bar ====== */}
+      <div className={`${FOOT_WRAP} flex flex-col gap-6 pb-[30px] pt-[25px] md:flex-row md:justify-between`}>
+        <div className="flex flex-wrap items-center gap-x-[28px] gap-y-3 md:mt-[7px] md:self-start">
+          <p className="text-[12px] font-bold uppercase leading-none text-white">Download our app</p>
+          <div className="flex gap-[11px]">
+            <AppStoreBadge />
+            <GooglePlayBadge />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-[17px] md:items-end">
+          <ul className="flex gap-2" aria-label="Accepted payment methods">
+            {PAYMENTS.map((p) => (
+              <li
+                key={p.name}
+                title={p.name}
+                className={`flex h-[25px] w-10 items-center justify-center rounded-[3px] text-[9px] leading-none ${p.cls}`}
+              >
+                {p.text}
+              </li>
+            ))}
+          </ul>
+          <p className="text-[11px] leading-4">
+            © {new Date().getFullYear()} <span className={ACCENT}>LeadersMart</span>. All Rights Reserved.
+          </p>
         </div>
       </div>
     </footer>
