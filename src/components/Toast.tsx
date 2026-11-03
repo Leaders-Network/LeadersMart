@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+// init toast state
 interface ToastProps {
   message: string;
   type: 'success' | 'error' | 'info';
