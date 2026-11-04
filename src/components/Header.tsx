@@ -3,16 +3,9 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
-import { Roboto } from 'next/font/google';
 import { useCart } from '@/context/CartContext';
 import { categories } from '@/data/categories';
 import Image from 'next/image';
-
-const roboto = Roboto({
-  subsets: ['latin'],
-  weight: ['400', '500', '700', '900'],
-  display: 'swap',
-});
 
 /* ------------------------------ settings -------------------------------- */
 
@@ -214,7 +207,7 @@ export default function Header() {
     <div aria-hidden="true" className="h-[117px] md:h-[109px] lg:h-[150px]" />
 
     <header
-      className={`${roboto.className} fixed inset-x-0 top-0 z-50 border-b border-[#e5e5e5] bg-white text-[#222] md:translate-y-[var(--topbar-offset)]`}
+      className="fixed inset-x-0 top-0 z-50 border-b border-[#e5e5e5] bg-white text-[#222] md:translate-y-[var(--topbar-offset)] font-sans"
       style={{ '--topbar-offset': `-${topBarOffset}px` } as CSSProperties}
     >
       {/* ===== DARK AREA: top strip + main row share one navy background ===== */}
