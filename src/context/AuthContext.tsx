@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { users as staticUsers } from '@/data/users';
 import { User } from '@/types';
@@ -40,15 +40,15 @@ function writeLocalUsers(users: User[]) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ user: null, signingIn: false });
-  const router = useRouter();
-
-  useEffect(() => {
+  const [state, setState] = useState<AuthState>(() => {
+    // Initialize state from localStorage on mount
     try {
-      const raw = localStorage.getItem(AUTH_KEY);
-      if (raw) setState({ user: JSON.parse(raw), signingIn: false });
+      const raw = typeof window !== 'undefined' ? localStorage.getItem(AUTH_KEY) : null;
+      if (raw) return { user: JSON.parse(raw), signingIn: false };
     } catch {}
-  }, []);
+    return { user: null, signingIn: false };
+  });
+  const router = useRouter();
 
   const signIn = async (email: string, password: string) => {
     setState((s) => ({ ...s, signingIn: true }));

@@ -9,8 +9,22 @@ import { MdProductionQuantityLimits } from 'react-icons/md';
 import Image from 'next/image';
 
 export default function AdminSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebarCollapsed');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    }
+    return false;
+  });
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      return savedTheme === 'dark';
+    }
+    return false;
+  });
   
   const links = [
     { href: '/admin', label: 'Dashboard', icon: AiOutlineDashboard },
@@ -34,16 +48,6 @@ export default function AdminSidebar() {
     }
   }, [isCollapsed]);
 
-  // Load saved state on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sidebarCollapsed');
-      if (saved) {
-        setIsCollapsed(JSON.parse(saved));
-      }
-    }
-  }, []);
-
   // Listen for theme changes
   useEffect(() => {
     const handleThemeChange = (event) => {
@@ -51,14 +55,6 @@ export default function AdminSidebar() {
     };
 
     window.addEventListener('themeToggle', handleThemeChange);
-
-    // Check initial theme
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        setIsDarkMode(false);
-      }
-    }
 
     return () => {
       window.removeEventListener('themeToggle', handleThemeChange);
