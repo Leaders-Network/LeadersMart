@@ -5,6 +5,11 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import ConditionalHeader from "@/components/ConditionalHeader";
+import { ProductModalProvider } from "@/components/context/ProductModalContext";
+import ConditionalHeader from "@/components/ConditionalHeader";
+import { Lexend } from "next/font/google";
+import ScrollToTop from "@/components/ui/ScrollToTop";
+import Footer from "@/components/Footer";
 
 
 const geistSans = Geist({
@@ -23,7 +28,7 @@ const lexend = Lexend({
 });
 
 export const metadata: Metadata = {
-  title: "LeaderSmart - Your Online Store",
+  title: "LeadersMart - Your Online Store",
   description: "Browse and shop from our wide selection of products",
 };
 
@@ -45,6 +50,14 @@ export default function RootLayout({
               <main className="min-h-screen">{children}</main>
             </CartProvider>
           </ToastProvider>
+          <CartProvider>
+            <ProductModalProvider>
+              <ConditionalHeader />
+              <ScrollToTop />
+              <main className="min-h-screen">{children}</main>
+            </ProductModalProvider>
+          </CartProvider>
+          <Footer />
         </AuthProvider>
       </body>
     </html>

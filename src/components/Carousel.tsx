@@ -7,19 +7,19 @@ const slides = [
     title: 'Mega Flash Sale',
     subtitle: 'Up to 70% OFF',
     description: 'Limited time offer on selected items',
-    gradient: 'from-blue-600 via-indigo-600 to-purple-600',
+    gradient: 'from-[#4B4FED] via-[#8B52D7] to-[#C7449A]',
   },
   {
     title: 'New Arrivals',
     subtitle: 'Fresh Collection',
     description: 'Discover the latest products just for you',
-    gradient: 'from-indigo-600 via-blue-600 to-cyan-600',
+    gradient: 'from-[#C7449A] via-[#8B52D7] to-[#4B4FED]',
   },
   {
     title: 'Free Delivery',
-    subtitle: 'On Orders Above ₦80,000',
+    subtitle: 'On Orders Above ₦50',
     description: 'Shop now and save on shipping',
-    gradient: 'from-purple-600 via-indigo-600 to-blue-600',
+    gradient: 'from-[#4B4FED] via-[#8B52D7] to-[#C7449A]',
   },
 ];
 
@@ -48,7 +48,7 @@ export default function Carousel() {
                 <h1 className="text-6xl font-bold mb-4 animate-fade-in">{slide.title}</h1>
                 <p className="text-4xl font-semibold mb-4 animate-fade-in-delay">{slide.subtitle}</p>
                 <p className="text-xl mb-8 animate-fade-in-delay-2">{slide.description}</p>
-                <a href="/categories/electronics" className="inline-block bg-white text-blue-600 px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 animate-fade-in-delay-3">
+                <a href="/categories/electronics" className="inline-block bg-white text-[#8B52D7] px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F3FF] transition-all transform hover:scale-105 animate-fade-in-delay-3">
                   Shop Now
                 </a>
               </div>

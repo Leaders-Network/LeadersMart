@@ -17,8 +17,6 @@ export interface Product {
   stock?: number;
   colors?: string[];
   sizes?: string[];
-  vendorLocation: string; // State where vendor is located
-  deliveryServices: DeliveryService[]; // Available delivery services for this product
 }
 
 export interface Category {

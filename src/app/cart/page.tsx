@@ -1,60 +1,214 @@
 'use client';
 
-import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
-import AuthGuard from '@/components/AuthGuard';
+// src/app/cart/page.tsx
+
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
+import type { Product } from '@/types';
+import { useCart } from '@/context/CartContext';
+import SoftImg from '@/components/ui/Softimg';
+import { bestSellers } from '@/data/categorySections';
+import { formatMoney } from '@/types/product';
+import { roboto } from '@/lib/fonts';
 
+/* ==========================================================================
+   SETTINGS  -  the things you will most likely want to change
+   ========================================================================== */
 const deliveryServices = [
-  { id: 'dhl', name: 'DHL Express', price: 25600, estimatedDays: '1-2 days' },
-  { id: 'chowdeck', name: 'Chowdeck', price: 14400, estimatedDays: '2-3 days' },
-  { id: 'ridedeliva', name: 'Ridedeliva', price: 20800, estimatedDays: '1-3 days' },
+  { id: 'dhl', name: 'DHL Express', price: 15.99, estimatedDays: '1-2 days' },
+  { id: 'chowdeck', name: 'Chowdeck', price: 8.99, estimatedDays: '2-3 days' },
+  { id: 'ridedeliva', name: 'Ridedeliva', price: 12.99, estimatedDays: '1-3 days' },
 ];
 
-const paymentOptions = [
-  {
-    id: 'momo',
-    label: 'MTN MoMo',
-    description: 'Pay securely with your MTN mobile wallet for transfers, bill payments, and cashless transactions.',
-    badge: 'Recommended',
-    icon: '💰',
-  },
-  {
-    id: 'ussd',
-    label: 'MTN MoMo USSD',
-    description: 'Use your MTN USSD code to authorize a quick, secure mobile money payment.',
-    badge: 'Fast',
-    icon: '📱',
-  },
-  {
-    id: 'bank',
-    label: 'Bank Transfer',
-    description: 'Transfer to a regular bank account for checkout.',
-    badge: 'Secure',
-    icon: '🏦',
-  },
-  {
-    id: 'card',
-    label: 'Debit / Credit Card',
-    description: 'Use your Visa or Mastercard for secure payment.',
-    badge: 'Popular',
-    icon: '💳',
-  },
-];
+/** Subtotal at which delivery becomes free. Set to 0 to hide the progress line and turn the perk off. */
+const FREE_DELIVERY_THRESHOLD = 500;
 
-type CompletedOrder = {
-  paymentMethod: string;
-  amount: number;
-  itemCount: number;
-  items: Array<{
-    name: string;
-    quantity: number;
-    serviceName: string;
-    serviceFee: number;
-  }>;
+/** DEMO coupons (percent off). Replace with real validation from your backend. */
+const COUPONS: Record<string, number> = { WELCOME10: 10, LEADERS5: 5 };
+
+/* Colours: one accent, everything else neutral */
+const ACCENT = 'bg-[#4B4FED] hover:bg-[#3d41d9]';
+const INK = 'text-[#1c1b22]';
+const MUTED = 'text-[#6f6d78]';
+const FAINT = 'text-[#9a98a3]';
+const LINE = 'border-[#e7e5df]';
+const GREEN = 'text-[#1a7f4b]';
+
+const COLS = 'md:grid-cols-[minmax(0,1fr)_96px_124px_96px]';
+
+/* ------------------------------- icons ---------------------------------- */
+
+const svg = {
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.7,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  viewBox: '0 0 24 24',
+  'aria-hidden': true,
 };
+
+const CardIcon = () => (
+  <svg className="h-[22px] w-[22px]" {...svg}>
+    <rect x="3" y="5.5" width="18" height="13" rx="2" />
+    <path d="M3 10h18M7 15h3" />
+  </svg>
+);
+const BankIcon = () => (
+  <svg className="h-[22px] w-[22px]" {...svg}>
+    <path d="M3 9.5l9-5.5 9 5.5M5 9.5V18M9.5 9.5V18M14.5 9.5V18M19 9.5V18M3 20.5h18" />
+  </svg>
+);
+const UssdIcon = () => (
+  <svg className="h-[22px] w-[22px]" {...svg} strokeWidth={2.4}>
+    <path d="M7 6h.01M12 6h.01M17 6h.01M7 12h.01M12 12h.01M17 12h.01M7 18h.01M12 18h.01M17 18h.01" />
+  </svg>
+);
+const CashIcon = () => (
+  <svg className="h-[22px] w-[22px]" {...svg}>
+    <rect x="3" y="6.5" width="18" height="11" rx="2" />
+    <circle cx="12" cy="12" r="2.5" />
+    <path d="M6.5 10h.01M17.5 14h.01" strokeWidth={2.4} />
+  </svg>
+);
+const BasketIcon = () => (
+  <svg className="mx-auto h-12 w-12 text-[#b9b7c2]" {...svg} strokeWidth={1.4}>
+    <path d="M3 10h18l-2 10a2 2 0 01-2 1.6H7a2 2 0 01-2-1.6L3 10z" />
+    <path d="M8 10l3-6M16 10l-3-6M9 14v3M12 14v3M15 14v3" />
+  </svg>
+);
+const ArrowRight = () => (
+  <svg className="h-4 w-4" {...svg} strokeWidth={2}>
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+);
+const ArrowLeft = () => (
+  <svg className="h-4 w-4" {...svg} strokeWidth={2}>
+    <path d="M19 12H5M11 6l-6 6 6 6" />
+  </svg>
+);
+const CheckIcon = () => (
+  <svg className="h-4 w-4" {...svg} strokeWidth={2.4}>
+    <path d="M5 12.5l4.5 4.5L19 7.5" />
+  </svg>
+);
+
+const PAYMENT_METHODS = [
+  { id: 'card', label: 'Card', Icon: CardIcon },
+  { id: 'transfer', label: 'Bank transfer', Icon: BankIcon },
+  { id: 'ussd', label: 'USSD', Icon: UssdIcon },
+  { id: 'cod', label: 'On delivery', Icon: CashIcon },
+];
+
+/* ------------------------------ small pieces ---------------------------- */
+
+const STEPS = ['Cart', 'Details', 'Done'];
+
+function Steps() {
+  return (
+    <ol className="flex items-center gap-2 text-[13px]" aria-label="Checkout progress">
+      {STEPS.map((label, i) => (
+        <li key={label} className="flex items-center gap-2">
+          <span className={i === 0 ? `font-medium ${INK}` : FAINT}>
+            <span className="mr-1.5 tabular-nums">{i + 1}</span>
+            {label}
+          </span>
+          {i < STEPS.length - 1 && <span className={FAINT} aria-hidden="true">/</span>}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function Stepper({ value, max, onChange }: { value: number; max: number; onChange: (n: number) => void }) {
+  const btn = `flex h-9 w-9 items-center justify-center text-[18px] leading-none ${MUTED} transition-colors hover:bg-[#f4f3ef] hover:text-[#1c1b22] disabled:cursor-not-allowed disabled:text-[#cfcdd6] disabled:hover:bg-transparent`;
+  return (
+    <div className="inline-flex items-center rounded-md border border-[#d9d7d0]">
+      <button type="button" aria-label="Decrease quantity" disabled={value <= 1} onClick={() => onChange(value - 1)} className={`${btn} rounded-l-md`}>
+        −
+      </button>
+      <span className="flex h-9 min-w-[40px] items-center justify-center border-x border-[#d9d7d0] text-[14px] tabular-nums" aria-live="polite">
+        {value}
+      </span>
+      <button type="button" aria-label="Increase quantity" disabled={value >= max} onClick={() => onChange(value + 1)} className={`${btn} rounded-r-md`}>
+        +
+      </button>
+    </div>
+  );
+}
+
+function Line({ label, value, valueClass = '' }: { label: string; value: string; valueClass?: string }) {
+  return (
+    <div className="flex items-center justify-between text-[14px]">
+      <span className={MUTED}>{label}</span>
+      <span className={`tabular-nums ${valueClass || INK}`}>{value}</span>
+    </div>
+  );
+}
+
+/* "You might also like": adds straight to the cart above */
+function Suggestions({ excludeIds }: { excludeIds: string[] }) {
+  const { addToCart } = useCart();
+
+  const items = bestSellers
+    .filter(Boolean)
+    .filter((p) => !excludeIds.includes(String(p.id)))
+    .slice(0, 5);
+
+  if (items.length === 0) return null;
+
+  const add = (p: (typeof items)[number]) => {
+    const item: Product = {
+      id: String(p.id),
+      name: p.name,
+      price: p.price,
+      image: p.image,
+      category: '',
+      description: '',
+    };
+    addToCart(item);
+  };
+
+  return (
+    <section className="mt-16" aria-labelledby="suggest-title">
+      <div className="mb-5 flex items-baseline justify-between">
+        <h2 id="suggest-title" className={`text-[20px] font-medium ${INK}`}>
+          You might also like
+        </h2>
+        <Link href="/categories" className={`text-[14px] underline underline-offset-4 ${MUTED} hover:text-[#1c1b22]`}>
+          Browse all
+        </Link>
+      </div>
+
+      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {items.map((p) => (
+          <li key={p.id} className={`rounded-lg border ${LINE} bg-white p-3 transition-colors hover:border-[#c9c7bf]`}>
+            <Link href={p.href} className="block aspect-square overflow-hidden rounded-md bg-[#f3f2ee]" aria-label={p.name}>
+              <SoftImg src={p.image} alt="" className="h-full w-full object-contain p-2" />
+            </Link>
+            <h3 className="mt-3 line-clamp-2 min-h-[34px] text-[13px] leading-[17px] text-[#333]">
+              <Link href={p.href} className="hover:underline">
+                {p.name}
+              </Link>
+            </h3>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <span className={`text-[15px] font-medium ${INK}`}>{formatMoney(p.price)}</span>
+              <button
+                type="button"
+                onClick={() => add(p)}
+                className="h-8 rounded-md border border-[#d9d7d0] px-3 text-[13px] font-medium text-[#1c1b22] transition-colors hover:border-[#1c1b22]"
+              >
+                Add
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/* -------------------------------- page ---------------------------------- */
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, updateDeliveryService, totalPrice, totalDeliveryPrice, clearCart, totalItems } = useCart();
@@ -126,6 +280,7 @@ export default function CartPage() {
     );
   }
 
+  /* ============================== CART ================================= */
   return (
     <AuthGuard>
       <div className="bg-gray-50 min-h-screen py-8">
@@ -294,10 +449,17 @@ export default function CartPage() {
                 href="/"
                 className="block text-center text-blue-600 hover:text-green-600 font-semibold transition-colors"
               >
-                Continue Shopping
+                Checkout <ArrowRight />
               </Link>
+
+              <p className={`mt-4 text-center text-[13px] ${MUTED}`}>
+                Questions?{' '}
+                <Link href="/help" className="underline underline-offset-2 hover:text-[#1c1b22]">
+                  Contact support
+                </Link>
+              </p>
             </div>
-          </div>
+          </aside>
         </div>
 
         {isPaymentSuccessOpen && (
