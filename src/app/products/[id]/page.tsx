@@ -152,10 +152,6 @@ export default function ProductPage({ params, searchParams }: { params: Promise<
 
   const router = useRouter();
   const { addToCart } = useCart();
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || 'Blue');
-  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || 'Medium');
 
   // Get initial image index from URL or default to 0
   const initialImageIndex = img ? parseInt(img, 10) : 0;
