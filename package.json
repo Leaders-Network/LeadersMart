@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint --max-warnings=999"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -22,6 +22,7 @@
     "recharts": "^3.5.1"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",

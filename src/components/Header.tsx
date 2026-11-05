@@ -1,332 +1,477 @@
- 'use client';
+'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
 import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
 import { categories } from '@/data/categories';
-import { useState } from 'react';
+import Image from 'next/image';
+
+/* ------------------------------ settings -------------------------------- */
+
+/* EDIT THESE: shown in the thin strip at the top. Use your real offer and number. */
+const TRUST_MESSAGE = 'Free delivery on orders over ₦50,000 · Pay on delivery available';
+const HOTLINE_LABEL = '+234 8124106198';
+const HOTLINE_HREF = 'tel:+8884344600';
+
+/* Colours. NAVY is the header background; BRAND is used on the white nav row. */
+const NAVY = '#05052b';
+const BRAND = '#7544cf';
+const MAGENTA = '#C7449A';
+const BTN_GRADIENT = 'bg-gradient-to-r from-[#4B4FED] via-[#6a48e0] to-[#9b4bd6]';
+
+const WRAP = 'mx-auto w-full max-w-[1920px] px-[15px]';
+
+type NavItem = { label: string; href: string };
+
+/* NOTE: /new-arrivals and /best-selling must exist as pages, or change these links. */
+const NAV_ITEMS: NavItem[] = [
+  { label: 'Home', href: '/' },
+  { label: 'New Arrivals', href: '/new-arrivals' },
+  { label: 'Best Selling', href: '/best-selling' },
+  { label: 'Help', href: '/help' },
+];
+
+/* ------------------------------- icons ---------------------------------- */
+
+function Caret({ className = '' }: { className?: string }) {
+  return (
+    <svg className={`w-2 h-1 shrink-0 ${className}`} viewBox="0 0 10 5" fill="currentColor" aria-hidden="true">
+      <path d="M0 0h10L5 5z" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" />
+      <path strokeLinecap="round" d="M20 20l-3.5-3.5" />
+    </svg>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg className="w-[26px] h-[26px]" fill="none" stroke="currentColor" strokeWidth={1.7} viewBox="0 0 32 32" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h4l3.5 15h14L28 10H9" />
+      <circle cx="12" cy="26" r="2" />
+      <circle cx="23" cy="26" r="2" />
+    </svg>
+  );
+}
+
+function HeartIcon() {
+  return (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.7} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 20.5s-7.5-4.6-9.3-9.3C1.5 8 3.4 4.8 6.6 4.8c1.9 0 3.6 1 4.6 2.6l.8 1.2.8-1.2c1-1.6 2.7-2.6 4.6-2.6 3.2 0 5.1 3.2 3.9 6.4-1.8 4.7-9.3 9.3-9.3 9.3z"
+      />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg className="w-[26px] h-[26px]" fill="none" stroke="currentColor" strokeWidth={1.7} viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="11" r="5.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 27c0-5.5 4.9-9 11-9s11 3.5 11 9" />
+    </svg>
+  );
+}
+
+function MenuIcon({ className = 'w-[16px] h-[16px]' }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" d="M3 6h18M3 12h18M3 18h18" />
+    </svg>
+  );
+}
+
+/* --------------------------- header background -------------------------- */
+
+/* Thin flowing ribbon lines (blue to violet to magenta) drawn on the navy background.
+   Pure SVG, so there is no image file to download or add to the project. */
+const WAVE_FROM = [18, -30, 92, 28, 74, 8];
+const WAVE_TO = [96, 74, 14, 86, 14, 74];
+const WAVE_COUNT = 38;
+
+const WAVE_PATHS = Array.from({ length: WAVE_COUNT }, (_, i) => {
+  const t = i / (WAVE_COUNT - 1);
+  const v = WAVE_FROM.map((a, k) => (a + (WAVE_TO[k] - a) * t).toFixed(1));
+  return `M-20 ${v[0]} C 360 ${v[1]}, 700 ${v[2]}, 1000 ${v[3]} S 1300 ${v[4]}, 1460 ${v[5]}`;
+});
+
+function HeaderBackground() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" style={{ backgroundColor: NAVY }}>
+      {/* soft blue glow top-left, magenta glow bottom-right */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_12%_-30%,rgba(75,79,237,0.5),transparent_55%),radial-gradient(ellipse_at_88%_140%,rgba(199,68,154,0.38),transparent_55%)]" />
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1440 108" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="header-wave-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1440" y2="0">
+            <stop offset="0%" stopColor="#4B4FED" />
+            <stop offset="55%" stopColor="#8B52D7" />
+            <stop offset="100%" stopColor="#C7449A" />
+          </linearGradient>
+        </defs>
+        {WAVE_PATHS.map((d, i) => (
+          <path
+            key={i}
+            d={d}
+            fill="none"
+            stroke="url(#header-wave-grad)"
+            strokeWidth={0.7}
+            strokeOpacity={0.5}
+            vectorEffect="non-scaling-stroke"
+          />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+/* Background for the All Categories button: same navy-to-violet flow as the header,
+   with a few of the same ribbon lines so the two pieces feel like one design. */
+function CategoryBackground() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 overflow-hidden bg-[linear-gradient(100deg,#07073a_0%,#2b2fc9_55%,#8B52D7_100%)]"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_92%_130%,rgba(199,68,154,0.5),transparent_60%)]" />
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1440 108" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="cat-wave-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1440" y2="0">
+            <stop offset="0%" stopColor="#8f9bff" />
+            <stop offset="100%" stopColor="#f0abfc" />
+          </linearGradient>
+        </defs>
+        {WAVE_PATHS.filter((_, i) => i % 2 === 0).map((d, i) => (
+          <path
+            key={i}
+            d={d}
+            fill="none"
+            stroke="url(#cat-wave-grad)"
+            strokeWidth={0.7}
+            strokeOpacity={0.35}
+            vectorEffect="non-scaling-stroke"
+          />
+        ))}
+      </svg>
+      <div className="absolute inset-x-0 top-0 h-px bg-white/20" />
+    </div>
+  );
+}
+
+/* ------------------------------ component ------------------------------- */
 
 export default function Header() {
-  const { totalItems, cart, totalPrice } = useCart();
-  const { user, signOut } = useAuth();
-  const [showCategories, setShowCategories] = useState(false);
-  const [showAccountMenu, setShowAccountMenu] = useState(false);
-  const [showCartPreview, setShowCartPreview] = useState(false);
+  const { totalItems } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
 
-  const handleSignOut = () => {
-    signOut();
-    setShowAccountMenu(false);
+  const [query, setQuery] = useState('');
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  /* How far the top strip has been scrolled out of view (0 to 32px) */
+  const [topBarOffset, setTopBarOffset] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => setTopBarOffset(Math.min(window.scrollY, 32));
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // TODO: connect to a wishlist context when you have one
+  const wishlistCount = 0;
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
   };
 
+  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
+
+  /* hover colour on the dark header vs. on the white nav row */
+  const hoverLight = 'hover:text-[#d8b4fe] transition-colors';
+
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <>
+    {/* Spacer: the header is fixed, so this reserves its height.
+        mobile: main 64 + search 52 + border 1 | md: strip 32 + main 76 + border 1 | lg: + nav 41 */}
+    <div aria-hidden="true" className="h-[117px] md:h-[109px] lg:h-[150px]" />
 
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white py-2">
-        <div className="container mx-auto px-4 text-sm flex justify-between">
-          <span>Welcome to LeaderSmart - Your trusted marketplace</span>
-          <span>Free delivery on orders above ₦80,000</span>
-        </div>
-      </div>
+    <header
+      className="fixed inset-x-0 top-0 z-50 border-b border-[#e5e5e5] bg-white text-[#222] md:translate-y-[var(--topbar-offset)] font-sans"
+      style={{ '--topbar-offset': `-${topBarOffset}px` } as CSSProperties}
+    >
+      {/* ===== DARK AREA: top strip + main row share one navy background ===== */}
+      <div className="relative text-white">
+        <HeaderBackground />
 
-      <nav className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-
-          {/* Logo */}
-          <Link
-            href="/"
-            className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
-          >
-            LeadersMart
-          </Link>
-
-          {/* Search Bar */}
-          <div className="flex-1 mx-8">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search products, brands and categories..."
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
-              <button className="absolute right-0 top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-r-lg hover:from-blue-700 hover:to-indigo-700">
-                Search
-              </button>
+        <div className="relative">
+          {/* ============================ TOP STRIP ========================== */}
+          <div className="hidden md:block h-[32px] border-b border-white/10 bg-[#020218]/55 text-[12px] leading-none text-white/90">
+            <div className={`${WRAP} h-full flex items-center justify-between`}>
+              <p>{TRUST_MESSAGE}</p>
+              <div className="flex items-center gap-5">
+                <Link href="/help" className="hover:text-[#d8b4fe] transition-colors">Help Center</Link>
+                <a href={HOTLINE_HREF} className="hidden sm:inline hover:text-[#d8b4fe] transition-colors">
+                  Call us: {HOTLINE_LABEL}
+                </a>
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-6 items-center">
-
-            {/* Account Dropdown */}
-            <div
-              className="relative cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
-              onMouseEnter={() => setShowAccountMenu(true)}
-              onMouseLeave={() => setShowAccountMenu(false)}
+          {/* ============================ MAIN ROW =========================== */}
+          <div className={`${WRAP} flex items-center h-[64px] md:h-[76px]`}>
+            {/* Your logo has a white background, so it sits on a small white tile */}
+            <Link
+              href="/"
+              aria-label="LeadersMart home"
+              className="shrink-0 flex items-center rounded-md bg-white px-2 py-1 md:mr-[clamp(16px,3vw,48px)]"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
+              <Image
+                src="/images/leaders_mart_logo.png"
+                alt="LeadersMart"
+                width={200}
+                height={80}
+                priority
+                className="h-[40px] md:h-[52px] w-auto"
+              />
+            </Link>
 
-              <span className="text-sm font-semibold">
-                {user ? `Hi, ${user.name.split(' ')[0]}` : 'Account'}
-              </span>
+            {/* Search: white bar, gradient button */}
+            <form
+              onSubmit={handleSearch}
+              role="search"
+              className="hidden md:flex mx-auto flex-1 min-w-0 max-w-[680px] h-[44px] overflow-hidden rounded-[6px] bg-white"
+            >
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search products, brands and categories"
+                aria-label="Search products"
+                className="flex-1 min-w-0 px-4 text-[14px] text-[#333] placeholder-[#8a8a8a] outline-none"
+              />
+              <button
+                type="submit"
+                aria-label="Search"
+                className={`flex shrink-0 items-center justify-center gap-2 px-6 text-[14px] font-medium text-white transition hover:brightness-110 ${BTN_GRADIENT}`}
+              >
+                <SearchIcon />
+                <span className="hidden lg:inline">Search</span>
+              </button>
+            </form>
 
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-
-              {showAccountMenu && (
-                <div className="absolute top-full right-0 mt-2 w-56 bg-white shadow-2xl rounded-lg overflow-hidden border-2 border-blue-100 z-50">
-                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3">
-                    {user ? (
-                      <>
-                        <p className="font-semibold">Hi, {user.name}!</p>
-                        <p className="text-xs text-blue-100">{user.email}</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="font-semibold">Welcome!</p>
-                        <p className="text-xs text-blue-100">Sign in to access your account</p>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="py-2">
-                    {user ? (
-                      <>
-                        <Link
-                          href="/dashboard"
-                          className="block px-4 py-3 hover:bg-blue-50 transition-colors font-medium text-gray-700 hover:text-blue-600"
-                        >
-                          <div className="flex items-center gap-3">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7z"
-                              />
-                            </svg>
-                            <span>My Dashboard</span>
-                          </div>
-                        </Link>
-
-                        <Link
-                          href="/account/change-password"
-                          className="block px-4 py-3 hover:bg-blue-50 transition-colors font-medium text-gray-700 hover:text-blue-600"
-                        >
-                          <div className="flex items-center gap-3">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                              />
-                            </svg>
-                            <span>Change Password</span>
-                          </div>
-                        </Link>
-
-                        <button
-                          onClick={handleSignOut}
-                          className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors font-medium text-red-600 hover:text-red-700"
-                        >
-                          <div className="flex items-center gap-3">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                              />
-                            </svg>
-                            <span>Sign Out</span>
-                          </div>
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <Link
-                          href="/login"
-                          className="block px-4 py-3 hover:bg-blue-50 transition-colors font-medium text-gray-700 hover:text-blue-600"
-                        >
-                          <div className="flex items-center gap-3">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3v1"
-                              />
-                            </svg>
-                            <span>Sign In</span>
-                          </div>
-                        </Link>
-
-                        <Link
-                          href="/signup"
-                          className="block px-4 py-3 hover:bg-blue-50 transition-colors font-medium text-gray-700 hover:text-blue-600"
-                        >
-                          <div className="flex items-center gap-3">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-                              />
-                            </svg>
-                            <span>Create Account</span>
-                          </div>
-                        </Link>
-
-                        <div className="border-t my-2"></div>
-
-                        <Link
-                          href="/help"
-                          className="block px-4 py-3 hover:bg-blue-50 transition-colors font-medium text-gray-700 hover:text-blue-600"
-                        >
-                          <div className="flex items-center gap-3">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            <span>Help Center</span>
-                          </div>
-                        </Link>
-                      </>
-                    )}
-                  </div>
+            {/* Account / Wish list / Cart */}
+            <div className="shrink-0 ml-auto md:ml-[clamp(16px,3vw,40px)] flex items-center gap-5 lg:gap-8 text-[14px]">
+              <div className="hidden sm:flex items-center gap-2">
+                <UserIcon />
+                <div className="hidden lg:flex flex-col whitespace-nowrap leading-[18px]">
+                  <span className="text-[12px] text-white/70">Hello, Guest</span>
+                  <span className="font-medium">
+                    <Link href="/login" className={hoverLight}>Login</Link>
+                    <span className="mx-1.5 text-white/40">/</span>
+                    <Link href="/signup" className={hoverLight}>Register</Link>
+                  </span>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Cart */}
-            <div 
-              className="relative group"
-              onMouseEnter={() => setShowCartPreview(true)}
-              onMouseLeave={() => setShowCartPreview(false)}
-            >
-              <Link href="/cart" className="flex items-center gap-2 hover:text-blue-600 relative transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                <span className="text-sm font-semibold">Cart</span>
-                {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
-                    {totalItems}
+              <Link
+                href="/wishlist"
+                aria-label={`Wish list (${wishlistCount})`}
+                className={`relative hidden sm:flex items-center ${hoverLight}`}
+              >
+                <HeartIcon />
+                {wishlistCount > 0 && (
+                  <span
+                    className="absolute -top-2 -right-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-medium text-white"
+                    style={{ backgroundColor: MAGENTA }}
+                  >
+                    {wishlistCount}
                   </span>
                 )}
               </Link>
 
-              {/* Cart Dropdown Preview */}
-              {totalItems > 0 && showCartPreview && (
-                <div className="absolute top-full right-0 mt-2 w-80 bg-white shadow-2xl rounded-lg overflow-hidden border-2 border-blue-100 z-50">
-                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3">
-                    <p className="font-semibold">Cart Items ({totalItems})</p>
-                  </div>
-                  
-                  <div className="max-h-64 overflow-y-auto">
-                    {cart.slice(0, 3).map((item) => (
-                      <div key={item.id} className="flex items-center gap-3 p-3 border-b last:border-b-0">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded flex-shrink-0 overflow-hidden">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = 'https://placehold.co/48x48/e0e7ff/3b82f6?text=Item';
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm truncate">{item.name}</h4>
-                          <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
-                          <p className="text-sm font-bold text-green-600">₦{(item.price * item.quantity).toLocaleString()}</p>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {cart.length > 3 && (
-                      <div className="p-3 text-center text-sm text-gray-600">
-                        +{cart.length - 3} more items
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-3 bg-gray-50 border-t">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold">Total:</span>
-                      <span className="font-bold text-green-600">₦{totalPrice.toLocaleString()}</span>
-                    </div>
-                    <Link
-                      href="/cart"
-                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all text-center block font-semibold"
-                    >
-                      View Cart
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
+              <Link href="/cart" aria-label={`Cart (${totalItems} items)`} className={`flex items-center gap-2 ${hoverLight}`}>
+                <span className="relative flex">
+                  <CartIcon />
+                  <span
+                    className="absolute -top-2 -right-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-medium text-white"
+                    style={{ backgroundColor: MAGENTA }}
+                  >
+                    {totalItems}
+                  </span>
+                </span>
+                <span className="hidden lg:inline font-medium">Cart</span>
+              </Link>
 
-            {/* Top Links */}
-            <Link href="/" className="text-gray-700 hover:text-blue-600 font-semibold transition-colors">
-              Home
-            </Link>
-            <Link href="/deals" className="text-gray-700 hover:text-blue-600 font-semibold transition-colors">
-              Today's Deals
-            </Link>
-            <Link href="/help" className="text-gray-700 hover:text-blue-600 font-semibold transition-colors">
-              Help
-            </Link>
-
-            {/* Categories */}
-            <div
-              className="relative"
-              onMouseEnter={() => setShowCategories(true)}
-              onMouseLeave={() => setShowCategories(false)}
-            >
-              <button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 font-semibold">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                All Categories
+              <button
+                type="button"
+                className="lg:hidden p-1"
+                aria-label="Toggle menu"
+                aria-expanded={mobileOpen}
+                onClick={() => setMobileOpen((v) => !v)}
+              >
+                <MenuIcon className="w-6 h-6" />
               </button>
-
-              {showCategories && (
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white shadow-2xl rounded-lg overflow-hidden border-2 border-blue-100">
-                  {categories.map((category) => (
-                    <Link
-                      key={category.id}
-                      href={`/categories/${category.slug}`}
-                      className="block px-6 py-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 transition-all border-b last:border-b-0 font-medium"
-                    >
-                      {category.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
             </div>
+          </div>
 
+          {/* Mobile search */}
+          <form onSubmit={handleSearch} role="search" className="md:hidden px-4 pb-3">
+            <div className="flex h-10 overflow-hidden rounded-[6px] bg-white">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search products"
+                aria-label="Search products"
+                className="flex-1 min-w-0 px-3 text-sm text-[#333] outline-none"
+              />
+              <button
+                type="submit"
+                aria-label="Search"
+                className={`flex w-12 items-center justify-center text-white ${BTN_GRADIENT}`}
+              >
+                <SearchIcon />
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* ========================== NAVIGATION ROW ======================= */}
+      <div className="hidden lg:block">
+        <div className={`${WRAP} relative h-[40px] flex items-stretch`}>
+          {/* All Categories: flat button with a dropdown */}
+          <div className="relative group w-[clamp(210px,19.8vw,270px)] shrink-0">
+            <button
+              type="button"
+              className="relative flex h-full w-full items-center gap-3 overflow-hidden px-5 text-[14px] font-medium text-white"
+            >
+              <CategoryBackground />
+              <span className="relative flex items-center gap-3">
+                <MenuIcon />
+                <span>All Categories</span>
+              </span>
+            </button>
+
+            <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute left-0 top-full z-50 w-full border border-[#e5e5e5] bg-white shadow-md">
+              {categories.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/categories/${c.slug}`}
+                  className="block border-b border-[#f0f0f0] px-5 py-2.5 text-[14px] text-[#333] last:border-b-0 hover:bg-[#f7f4fd] hover:text-[#7544cf] transition-colors"
+                >
+                  {c.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Main links: plain text, sentence case */}
+          <nav
+            className="ml-[clamp(20px,3.4vw,46px)] flex items-stretch gap-[clamp(20px,2.6vw,36px)] whitespace-nowrap"
+            aria-label="Main"
+          >
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center border-b-2 text-[14px] transition-colors ${
+                    active
+                      ? 'border-[#7544cf] font-medium text-[#7544cf]'
+                      : 'border-transparent text-[#333] hover:text-[#7544cf]'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Special offers: plain text link */}
+          <div className="ml-auto flex items-center pl-4">
+            <Link href="/deals" className="text-[14px] font-medium hover:underline" style={{ color: MAGENTA }}>
+              Special Offers
+            </Link>
           </div>
         </div>
-      </nav>
+      </div>
+
+      {/* Thin brand-gradient line along the bottom edge of the whole header */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-[#4B4FED] via-[#8B52D7] to-[#C7449A]" />
+
+      {/* ============================ MOBILE MENU ======================== */}
+      {mobileOpen && (
+        <nav className="lg:hidden max-h-[70vh] overflow-y-auto border-t border-[#e5e5e5] bg-white" aria-label="Mobile">
+          <ul className="px-4 py-1 divide-y divide-[#f0f0f0]">
+            <li>
+              <details className="group/m">
+                <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-[15px] font-medium text-[#222]">
+                  All Categories
+                  <Caret className="transition-transform group-open/m:rotate-180" />
+                </summary>
+                <ul className="pb-3 pl-3">
+                  {categories.map((c) => (
+                    <li key={c.id}>
+                      <Link
+                        href={`/categories/${c.slug}`}
+                        onClick={() => setMobileOpen(false)}
+                        className="block py-1.5 text-[14px] text-[#666]"
+                      >
+                        {c.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </li>
+            {NAV_ITEMS.map((item) => (
+              <li key={item.label}>
+                <Link
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`block py-3 text-[15px] ${isActive(item.href) ? 'font-medium text-[#7544cf]' : 'text-[#222]'}`}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link
+                href="/deals"
+                onClick={() => setMobileOpen(false)}
+                className="block py-3 text-[15px] font-medium"
+                style={{ color: MAGENTA }}
+              >
+                Special Offers
+              </Link>
+            </li>
+            <li>
+              <Link href="/wishlist" onClick={() => setMobileOpen(false)} className="block py-3 text-[15px] text-[#222]">
+                Wish List{wishlistCount > 0 ? ` (${wishlistCount})` : ''}
+              </Link>
+            </li>
+            <li>
+              <Link href="/login" onClick={() => setMobileOpen(false)} className="block py-3 text-[15px] text-[#222]">
+                Login / Register
+              </Link>
+            </li>
+          </ul>
+        </nav>
+      )}
     </header>
+    </>
   );
 }

@@ -96,47 +96,18 @@ const products: Product[] = [
 const categories = ['All', 'Electronics', 'Accessories', 'Peripherals'] as const;
 const statuses: Status[] = ['All', 'active', 'low', 'out'];
 
-/* ================= HELPERS ================= */
-
-const getStatusConfig = (status: Status): StatusConfig => {
-  switch (status) {
-    case 'active':
-      return {
-        bg: 'bg-green-50',
-        text: 'text-green-700',
-        icon: CheckCircle,
-        label: 'In Stock'
-      };
-    case 'low':
-      return {
-        bg: 'bg-yellow-50',
-        text: 'text-yellow-700',
-        icon: AlertCircle,
-        label: 'Low Stock'
-      };
-    case 'out':
-      return {
-        bg: 'bg-red-50',
-        text: 'text-red-700',
-        icon: XCircle,
-        label: 'Out of Stock'
-      };
-    default:
-      return {
-        bg: 'bg-gray-50',
-        text: 'text-gray-700',
-        icon: Package,
-        label: 'All'
-      };
-  }
-};
-
-/* ================= PAGE ================= */
-
-const ProductPage = () => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [selectedStatus, setSelectedStatus] = useState<Status>('All');
+  const getStatusConfig = (status: string) => {
+    switch(status) {
+      case 'active':
+        return { bg: 'bg-green-50', text: 'text-green-700', icon: CheckCircle, label: 'In Stock' };
+      case 'low':
+        return { bg: 'bg-yellow-50', text: 'text-yellow-700', icon: AlertCircle, label: 'Low Stock' };
+      case 'out':
+        return { bg: 'bg-red-50', text: 'text-red-700', icon: XCircle, label: 'Out of Stock' };
+      default:
+        return { bg: 'bg-gray-50', text: 'text-gray-700', icon: Package, label: 'Unknown' };
+    }
+  };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch =

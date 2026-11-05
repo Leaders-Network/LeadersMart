@@ -3,8 +3,11 @@ import { Geist, Geist_Mono, Lexend } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
-import { ToastProvider } from "@/context/ToastContext";
+import { ProductModalProvider } from "@/components/context/ProductModalContext";
 import ConditionalHeader from "@/components/ConditionalHeader";
+import { Lexend } from "next/font/google";
+import ScrollToTop from "@/components/ui/ScrollToTop";
+import Footer from "@/components/Footer";
 
 
 const geistSans = Geist({
@@ -23,7 +26,7 @@ const lexend = Lexend({
 });
 
 export const metadata: Metadata = {
-  title: "LeaderSmart - Your Online Store",
+  title: "LeadersMart - Your Online Store",
   description: "Browse and shop from our wide selection of products",
 };
 
@@ -39,12 +42,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${lexend.variable} antialiased`}
       >
         <AuthProvider>
-          <ToastProvider>
-            <CartProvider>
+          <CartProvider>
+            <ProductModalProvider>
               <ConditionalHeader />
+              <ScrollToTop />
               <main className="min-h-screen">{children}</main>
-            </CartProvider>
-          </ToastProvider>
+            </ProductModalProvider>
+          </CartProvider>
+          <Footer />
         </AuthProvider>
       </body>
     </html>
