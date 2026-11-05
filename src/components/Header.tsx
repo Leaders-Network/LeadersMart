@@ -3,16 +3,10 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
-import { Roboto } from 'next/font/google';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { categories } from '@/data/categories';
 import Image from 'next/image';
-
-const roboto = Roboto({
-  subsets: ['latin'],
-  weight: ['400', '500', '700', '900'],
-  display: 'swap',
-});
 
 /* ------------------------------ settings -------------------------------- */
 
@@ -177,6 +171,7 @@ function CategoryBackground() {
 
 export default function Header() {
   const { totalItems } = useCart();
+  const { user, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -207,11 +202,6 @@ export default function Header() {
   /* hover colour on the dark header vs. on the white nav row */
   const hoverLight = 'hover:text-[#d8b4fe] transition-colors';
 
-  const handleSignOut = () => {
-    signOut();
-    setShowAccountMenu(false);
-  };
-
   return (
     <>
     {/* Spacer: the header is fixed, so this reserves its height.
@@ -219,7 +209,7 @@ export default function Header() {
     <div aria-hidden="true" className="h-[117px] md:h-[109px] lg:h-[150px]" />
 
     <header
-      className={`${roboto.className} fixed inset-x-0 top-0 z-50 border-b border-[#e5e5e5] bg-white text-[#222] md:translate-y-[var(--topbar-offset)]`}
+      className="fixed inset-x-0 top-0 z-50 border-b border-[#e5e5e5] bg-white text-[#222] md:translate-y-(--topbar-offset) font-sans"
       style={{ '--topbar-offset': `-${topBarOffset}px` } as CSSProperties}
     >
       {/* ===== DARK AREA: top strip + main row share one navy background ===== */}
@@ -287,12 +277,24 @@ export default function Header() {
               <div className="hidden sm:flex items-center gap-2">
                 <UserIcon />
                 <div className="hidden lg:flex flex-col whitespace-nowrap leading-[18px]">
-                  <span className="text-[12px] text-white/70">Hello, Guest</span>
-                  <span className="font-medium">
-                    <Link href="/login" className={hoverLight}>Login</Link>
-                    <span className="mx-1.5 text-white/40">/</span>
-                    <Link href="/signup" className={hoverLight}>Register</Link>
-                  </span>
+                  {user ? (
+                    <>
+                      <span className="max-w-[150px] truncate text-[12px] text-white/70">Hello, {user.name}</span>
+                      <span className="flex items-center gap-2 font-medium">
+                        <Link href="/dashboard" className={hoverLight}>My account</Link>
+                        <button type="button" onClick={signOut} className="text-white/70 transition-colors hover:text-white">Sign out</button>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[12px] text-white/70">Hello, Guest</span>
+                      <span className="font-medium">
+                        <Link href="/login" className={hoverLight}>Login</Link>
+                        <span className="mx-1.5 text-white/40">/</span>
+                        <Link href="/signup" className={hoverLight}>Register</Link>
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -422,7 +424,7 @@ export default function Header() {
       </div>
 
       {/* Thin brand-gradient line along the bottom edge of the whole header */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-[#4B4FED] via-[#8B52D7] to-[#C7449A]" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-linear-to-r from-[#4B4FED] via-[#8B52D7] to-[#C7449A]" />
 
       {/* ============================ MOBILE MENU ======================== */}
       {mobileOpen && (
@@ -475,11 +477,26 @@ export default function Header() {
                 Wish List{wishlistCount > 0 ? ` (${wishlistCount})` : ''}
               </Link>
             </li>
-            <li>
-              <Link href="/login" onClick={() => setMobileOpen(false)} className="block py-3 text-[15px] text-[#222]">
-                Login / Register
-              </Link>
-            </li>
+            {user ? (
+              <>
+                <li>
+                  <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="block py-3 text-[15px] text-[#222]">
+                    My account — {user.name}
+                  </Link>
+                </li>
+                <li>
+                  <button type="button" onClick={() => { setMobileOpen(false); signOut(); }} className="block py-3 text-[15px] text-[#222]">
+                    Sign out
+                  </button>
+                </li>
+              </>
+            ) : (
+              <li>
+                <Link href="/login" onClick={() => setMobileOpen(false)} className="block py-3 text-[15px] text-[#222]">
+                  Login / Register
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
       )}

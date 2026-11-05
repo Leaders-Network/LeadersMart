@@ -5,10 +5,24 @@ import Image from 'next/image';
 import { Bell, Moon, Search, Sun, X } from 'lucide-react';
 
 export default function AdminHeader() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      return savedTheme === 'dark';
+    }
+    return false;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebarCollapsed');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    }
+    return false;
+  });
   const [notifications] = useState([
     { id: 1, message: 'New order received', time: '5 min ago', unread: true },
     { id: 2, message: 'Product stock low', time: '1 hour ago', unread: true },
@@ -19,22 +33,14 @@ export default function AdminHeader() {
 
   // Listen for sidebar toggle events
   useEffect(() => {
-    const handleSidebarToggle = (event: any) => {
+    const handleSidebarToggle = (event: CustomEvent<{ isCollapsed: boolean }>) => {
       setSidebarCollapsed(event.detail.isCollapsed);
     };
 
-    window.addEventListener('sidebarToggle', handleSidebarToggle);
-
-    // Check initial state from localStorage
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sidebarCollapsed');
-      if (saved) {
-        setSidebarCollapsed(JSON.parse(saved));
-      }
-    }
+    window.addEventListener('sidebarToggle', handleSidebarToggle as EventListener);
 
     return () => {
-      window.removeEventListener('sidebarToggle', handleSidebarToggle);
+      window.removeEventListener('sidebarToggle', handleSidebarToggle as EventListener);
     };
   }, []);
 
@@ -45,16 +51,6 @@ export default function AdminHeader() {
       localStorage.setItem('theme', !isDarkMode ? 'dark' : 'light');
     }
   };
-
-  // Load theme preference on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        setIsDarkMode(true);
-      }
-    }
-  }, []);
 
   // Handle search
   const handleSearch = () => {

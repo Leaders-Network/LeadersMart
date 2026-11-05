@@ -38,8 +38,9 @@ export default function ChangePasswordPage() {
       await changePassword(newPass);
       alert('Password changed');
       router.push('/admin');
-    } catch (err: any) {
-      setError(err?.message || 'Failed to change password');
+    } catch (err: unknown) {
+      const error = err as Error;
+      setError(error?.message || 'Failed to change password');
     }
   };
 

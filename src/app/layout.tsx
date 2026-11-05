@@ -3,13 +3,12 @@ import { Geist, Geist_Mono, Lexend } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
-import { ToastProvider } from "@/context/ToastContext";
-import ConditionalHeader from "@/components/ConditionalHeader";
 import { ProductModalProvider } from "@/components/context/ProductModalContext";
 import ConditionalHeader from "@/components/ConditionalHeader";
-import { Lexend } from "next/font/google";
+// import { Lexend } from "next/font/google";
 import ScrollToTop from "@/components/ui/ScrollToTop";
-import Footer from "@/components/Footer";
+import ConditionalFooter from "@/components/ConditionalFooter";
+import { ToastProvider } from "@/context/ToastContext";
 
 
 const geistSans = Geist({
@@ -38,18 +37,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${lexend.variable} antialiased`}
-      >
-        <AuthProvider>
-          <ToastProvider>
-            <CartProvider>
-              <ConditionalHeader />
-              <main className="min-h-screen">{children}</main>
-            </CartProvider>
-          </ToastProvider>
+ return (
+  <html lang="en">
+    <body
+      className={`${geistSans.variable} ${geistMono.variable} ${lexend.variable} antialiased`}
+    >
+      <AuthProvider>
+        <ToastProvider>
           <CartProvider>
             <ProductModalProvider>
               <ConditionalHeader />
@@ -57,9 +51,10 @@ export default function RootLayout({
               <main className="min-h-screen">{children}</main>
             </ProductModalProvider>
           </CartProvider>
-          <Footer />
-        </AuthProvider>
-      </body>
-    </html>
-  );
+          <ConditionalFooter />
+        </ToastProvider>
+      </AuthProvider>
+    </body>
+  </html>
+);
 }

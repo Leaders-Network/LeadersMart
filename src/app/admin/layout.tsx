@@ -9,26 +9,26 @@ export default function AdminLayout({
 }: {
   children: ReactNode;
 }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  // Listen for sidebar toggle events to adjust main content
-  useEffect(() => {
-    const handleSidebarToggle = (event: any) => {
-      setSidebarCollapsed(event.detail.isCollapsed);
-    };
-
-    window.addEventListener('sidebarToggle', handleSidebarToggle);
-
-    // Check initial state from localStorage
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebarCollapsed');
       if (saved) {
-        setSidebarCollapsed(JSON.parse(saved));
+        return JSON.parse(saved);
       }
     }
+    return false;
+  });
+
+  // Listen for sidebar toggle events to adjust main content
+  useEffect(() => {
+    const handleSidebarToggle = (event: CustomEvent<{ isCollapsed: boolean }>) => {
+      setSidebarCollapsed(event.detail.isCollapsed);
+    };
+
+    window.addEventListener('sidebarToggle', handleSidebarToggle as EventListener);
 
     return () => {
-      window.removeEventListener('sidebarToggle', handleSidebarToggle);
+      window.removeEventListener('sidebarToggle', handleSidebarToggle as EventListener);
     };
   }, []);
 

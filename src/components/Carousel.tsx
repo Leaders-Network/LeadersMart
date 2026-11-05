@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 const slides = [
   {
@@ -48,9 +49,9 @@ export default function Carousel() {
                 <h1 className="text-6xl font-bold mb-4 animate-fade-in">{slide.title}</h1>
                 <p className="text-4xl font-semibold mb-4 animate-fade-in-delay">{slide.subtitle}</p>
                 <p className="text-xl mb-8 animate-fade-in-delay-2">{slide.description}</p>
-                <a href="/categories/electronics" className="inline-block bg-white text-[#8B52D7] px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F3FF] transition-all transform hover:scale-105 animate-fade-in-delay-3">
+                <Link href="/categories/electronics" className="inline-block bg-white text-[#8B52D7] px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F3FF] transition-all transform hover:scale-105 animate-fade-in-delay-3">
                   Shop Now
-                </a>
+                </Link>
               </div>
             </div>
           </div>
