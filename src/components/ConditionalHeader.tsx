@@ -6,8 +6,12 @@ import Header from './Header';
 export default function ConditionalHeader() {
   const pathname = usePathname();
   
-  // Hide header on admin and vendor pages
-  const hideHeader = pathname?.startsWith('/admin') || pathname?.startsWith('/vendor');
+  // Keep account and back-office pages focused on their own layouts.
+  const hideHeader =
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/vendor') ||
+    pathname === '/login' ||
+    pathname === '/signup';
   
   if (hideHeader) {
     return null;
